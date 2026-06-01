@@ -46,8 +46,16 @@ async function loadRepos() {
   const grid = document.getElementById('repoGrid');
 
   try {
-    const response = await fetch(DATA_URL);
-    if (!response.ok) throw new Error('Data file not found');
+    let response;
+    for (const url of [DATA_URL, './data/repos.json', 'data/repos.json']) {
+      try {
+        response = await fetch(url);
+        if (response.ok) break;
+      } catch (e) {
+        // try next url
+      }
+    }
+    if (!response || !response.ok) throw new Error('Data file not found');
     const data = await response.json();
 
     allRepos = data.repos || [];

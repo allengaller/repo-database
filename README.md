@@ -43,6 +43,14 @@ repo-hoarder/
 └── README.md
 ```
 
+## 🌐 在线访问
+
+项目已部署至 **GitHub Pages**，直接访问：
+
+👉 **https://allengaller.github.io/repo-hoarder/**
+
+> 数据每日随 Actions 自动更新，无需本地运行。
+
 ## 本地运行
 
 ```bash
@@ -52,9 +60,18 @@ pip install -r requirements.txt
 # 抓取数据（多源聚合）
 python3 scripts/scrape.py
 
+# 抓取指定月度新项目
+python3 scripts/update_monthly.py --year 2026 --month 5 --report
+
 # 预览 Web UI
 cd web && python3 -m http.server 8000
 ```
+
+### 启用 GitHub Pages 部署
+
+1. 进入仓库 **Settings → Pages**
+2. **Source** 选择 **GitHub Actions**
+3. 推送代码后自动部署，每次 `push` 到 `main` 或运行 `monthly-update.yml` 后都会自动重新部署
 
 ## 技术栈
 
