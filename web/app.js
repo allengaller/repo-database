@@ -67,9 +67,16 @@ async function loadRepos() {
     applyStagger();
 
   } catch (error) {
+    const isFileProtocol = window.location.protocol === 'file:';
     grid.innerHTML = `
-      <div class="loading">
-        <span style="color: var(--text-muted); font-size: 0.9rem;">无法加载数据，请先运行 scripts/scrape.py</span>
+      <div class="loading" style="flex-direction: column; gap: 10px;">
+        <span style="color: var(--text-muted); font-size: 0.95rem; font-weight: 500;">无法加载数据</span>
+        <span style="color: var(--text-muted); font-size: 0.8rem; max-width: 420px; text-align: center; line-height: 1.5;">
+          ${isFileProtocol
+            ? '当前通过 file:// 协议直接打开页面。请通过本地服务器访问：<br><code style="background: var(--bg-soft); padding: 2px 6px; border-radius: 4px;">cd web && python3 -m http.server 8000</code>'
+            : '请先在项目根目录运行 <code style="background: var(--bg-soft); padding: 2px 6px; border-radius: 4px;">python3 scripts/scrape.py</code> 生成数据文件'
+          }
+        </span>
       </div>
     `;
   }

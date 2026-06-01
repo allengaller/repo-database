@@ -1,0 +1,76 @@
+name: Monthly New Repos Update
+
+on:
+  schedule:
+    - cron: '0 2 1 * *'  # 每月1日 02:00 UTC
+  workflow_dispatch:
+    inputs:
+      year:
+        description: 'Year (e.g. 2026)'
+        required: false
+        default: ''
+      month:
+        description: 'Month 1-12'
+        required: false
+        default: ''
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Determine target month
+        id: target
+        run: |
+          if [ -n "${{ github.event.inputs.year }}" ]; then
+            YEAR="${{ github.event.inputs.year }}"
+            MONTH="${{ github.event.inputs.month }}"
+          else
+            # Default: previous month
+            YEAR=$(date -d "last month" +%Y)
+            MONTH=$(date -d "last month" +%m)
+          fi
+          echo "year=$YEAR" >> $GITHUB_OUTPUT
+          echo "month=$MONTH" >> $GITHUB_OUTPUT
+          echo "tag=${YEAR}-${MONTH}" >> $GITHUB_OUTPUT
+
+      - name: Fetch monthly repos
+        run: |
+          python scripts/update_monthly.py \
+            --year ${{ steps.target.outputs.year }} \
+            --month ${{ steps.target.outputs.month }} \
+            --report
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build summary
+        run: |
+          REPORT="data/monthly_report_${{ steps.target.outputs.tag }}.md"
+          echo "## 📊 Monthly New Repos — ${{ steps.target.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f "$REPORT" ]; then
+            cat "$REPORT" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Commit and push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update monthly repos for ${{ steps.target.outputs.tag }}"
+            git push
+          fi
