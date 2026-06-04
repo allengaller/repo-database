@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Discover quality GitHub projects with smart filtering">
+  <meta name="theme-color" content="#0c0c0e">
   <title>GitHub Treasure</title>
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,6 +27,11 @@
     <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
     </svg>
+  </button>
+
+  <!-- Language Toggle -->
+  <button class="lang-toggle" id="langToggle" aria-label="Toggle language">
+    <span class="lang-indicator">中</span>
   </button>
 
   <header class="header">
@@ -49,7 +57,15 @@
             <path d="M21 21l-4.35-4.35"/>
           </svg>
           <input type="text" id="searchInput" placeholder="搜索项目名称或描述...">
+          <div class="search-preview" id="searchPreview"></div>
         </div>
+
+        <button class="keyboard-help-btn" id="keyboardHelpBtn" title="键盘快捷键 (?)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/>
+          </svg>
+        </button>
 
         <div class="filter-group">
           <label>语言</label>
@@ -65,8 +81,31 @@
             <option value="stars">Stars</option>
             <option value="forks">Forks</option>
             <option value="today">今日增长</option>
+            <option value="rising">飙升指数</option>
           </select>
         </div>
+
+        <button class="bookmark-toggle" id="shareBtn" title="分享筛选">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+        </button>
+
+        <button class="bookmark-toggle" id="bookmarkToggle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+          我的收藏
+        </button>
+        <button class="bookmark-toggle" id="exportBookmarks" title="导出收藏">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </button>
       </div>
 
       <div class="filters-range">
@@ -92,6 +131,13 @@
       </div>
     </div>
 
+    <!-- Compare Bar -->
+    <div class="compare-bar" id="compareBar" style="display: none;">
+      <span class="compare-bar-text">已选择 <strong id="compareCount">0</strong>/2 个项目</span>
+      <button class="compare-btn" id="compareBtn">对比</button>
+      <button class="compare-btn clear" id="clearCompare">清空</button>
+    </div>
+
     <!-- Stats Bar -->
     <div class="stats-bar">
       <div class="stat">
@@ -113,6 +159,47 @@
         <span class="stat-value stat-date" id="lastUpdated">-</span>
         <span class="stat-label">数据更新</span>
       </div>
+      <div class="stat-div"></div>
+      <div class="stat">
+        <span class="stat-value stat-date" id="dataFreshness" style="display: none;">-</span>
+      </div>
+    </div>
+
+    <!-- Batch Bar -->
+    <div class="batch-bar" id="batchBar" style="display: none;">
+      <span class="batch-bar-text">已选择 <strong id="batchCount">0</strong> 个项目</span>
+      <button class="batch-btn" id="batchBookmarkAll">收藏全部</button>
+      <button class="batch-btn" id="batchExport">导出</button>
+      <button class="batch-btn clear" id="batchClear">清空</button>
+    </div>
+
+    <!-- Tag Categories -->
+    <div class="tag-categories" id="tagCategories"></div>
+
+    <!-- Discovery Bar -->
+    <div class="discovery-bar">
+      <button class="discovery-btn" id="discoverBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 16v-4M12 8h.01"/>
+        </svg>
+        发现宝藏
+      </button>
+      <button class="discovery-btn" id="recommendBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        智能推荐
+      </button>
+      <button class="discovery-btn" id="savePresetBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+        保存预设
+      </button>
+      <div class="presets-container" id="presetsContainer"></div>
     </div>
 
     <!-- Repo Grid -->
@@ -123,10 +210,67 @@
     </div>
   </main>
 
+  <!-- Detail Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="detailModal">
+      <div class="modal-header">
+        <div class="modal-icon" id="modalIcon"></div>
+        <div class="modal-title-wrap">
+          <h2 class="modal-title" id="modalTitle"></h2>
+          <span class="modal-author" id="modalAuthor"></span>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn" id="modalBookmark" aria-label="Bookmark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+          </button>
+          <button class="modal-close" id="modalClose" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <p class="modal-desc" id="modalDesc"></p>
+      <div class="modal-stats" id="modalStats"></div>
+      <div class="modal-source" id="modalSource"></div>
+      <div class="modal-links">
+        <a class="modal-link primary" id="modalGithubLink" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+          在 GitHub 查看
+        </a>
+        <button class="modal-link secondary" id="modalCopyUrl">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          复制 URL
+        </button>
+      </div>
+      <div class="clone-commands" id="cloneCommands">
+        <div class="clone-label">Clone 命令</div>
+        <div class="clone-btns">
+          <button class="clone-btn" id="modalCloneHttps">HTTPS</button>
+          <button class="clone-btn" id="modalCloneSsh">SSH</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer class="footer">
     <p>评分算法 · Stars + Fork率 + 增长加速度</p>
   </footer>
 
   <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>

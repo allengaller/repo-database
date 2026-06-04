@@ -15,6 +15,7 @@ try:
     import requests
 except ImportError:
     import subprocess
+
     subprocess.check_call([sys.executable, "-m", "pip", "install", "requests"])
     import requests
 
@@ -24,26 +25,78 @@ MIN_STARS = 500
 MIN_FORKS = 5
 
 AWESOME_LISTS = [
-    {"name": "awesome-python", "url": "https://raw.githubusercontent.com/vinta/awesome-python/HEAD/README.md"},
-    {"name": "awesome-go", "url": "https://raw.githubusercontent.com/avelino/awesome-go/HEAD/README.md"},
-    {"name": "awesome-javascript", "url": "https://raw.githubusercontent.com/sorrycc/awesome-javascript/HEAD/README.md"},
-    {"name": "awesome-rust", "url": "https://raw.githubusercontent.com/rust-unofficial/awesome-rust/HEAD/README.md"},
-    {"name": "awesome-java", "url": "https://raw.githubusercontent.com/akullpp/awesome-java/HEAD/README.md"},
-    {"name": "awesome-cpp", "url": "https://raw.githubusercontent.com/fffaraz/awesome-cpp/HEAD/README.md"},
-    {"name": "awesome-typescript", "url": "https://raw.githubusercontent.com/semlinker/awesome-typescript/HEAD/README.md"},
-    {"name": "awesome-swift", "url": "https://raw.githubusercontent.com/matteocrippa/awesome-swift/HEAD/README.md"},
+    {
+        "name": "awesome-python",
+        "url": "https://raw.githubusercontent.com/vinta/awesome-python/HEAD/README.md",
+    },
+    {
+        "name": "awesome-go",
+        "url": "https://raw.githubusercontent.com/avelino/awesome-go/HEAD/README.md",
+    },
+    {
+        "name": "awesome-javascript",
+        "url": "https://raw.githubusercontent.com/sorrycc/awesome-javascript/HEAD/README.md",
+    },
+    {
+        "name": "awesome-rust",
+        "url": "https://raw.githubusercontent.com/rust-unofficial/awesome-rust/HEAD/README.md",
+    },
+    {
+        "name": "awesome-java",
+        "url": "https://raw.githubusercontent.com/akullpp/awesome-java/HEAD/README.md",
+    },
+    {
+        "name": "awesome-cpp",
+        "url": "https://raw.githubusercontent.com/fffaraz/awesome-cpp/HEAD/README.md",
+    },
+    {
+        "name": "awesome-typescript",
+        "url": "https://raw.githubusercontent.com/semlinker/awesome-typescript/HEAD/README.md",
+    },
+    {
+        "name": "awesome-swift",
+        "url": "https://raw.githubusercontent.com/matteocrippa/awesome-swift/HEAD/README.md",
+    },
 ]
 
 LANGUAGES = [
-    "python", "javascript", "typescript", "go", "rust", "java",
-    "cpp", "c", "ruby", "swift", "kotlin", "dart", "csharp"
+    "python",
+    "javascript",
+    "typescript",
+    "go",
+    "rust",
+    "java",
+    "cpp",
+    "c",
+    "ruby",
+    "swift",
+    "kotlin",
+    "dart",
+    "csharp",
 ]
 
 GITHUB_NON_REPO_OWNERS = {
-    'features', 'markets', 'orgs', 'settings', 'explore',
-    'topics', 'trending', 'blog', 'marketplace', 'enterprise',
-    'collections', 'sponsors', 'mobile', 'security', 'customer-stories',
-    'team', 'pricing', 'readme', 'about', 'login', 'signup'
+    "features",
+    "markets",
+    "orgs",
+    "settings",
+    "explore",
+    "topics",
+    "trending",
+    "blog",
+    "marketplace",
+    "enterprise",
+    "collections",
+    "sponsors",
+    "mobile",
+    "security",
+    "customer-stories",
+    "team",
+    "pricing",
+    "readme",
+    "about",
+    "login",
+    "signup",
 }
 
 
@@ -51,7 +104,7 @@ def get_headers():
     """Build request headers with optional GitHub token"""
     headers = {
         "User-Agent": "Mozilla/5.0 (repo-hoarder)",
-        "Accept": "application/vnd.github.v3+json"
+        "Accept": "application/vnd.github.v3+json",
     }
     if GITHUB_TOKEN:
         headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
@@ -63,18 +116,18 @@ def parse_awesome_list(content):
     repos = set()
 
     # Match markdown links to GitHub repos: [text](https://github.com/owner/repo)
-    pattern = r'\[([^\]]*)\]\(https?://github\.com/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_.-]+)/?[^)]*\)'
+    pattern = r"\[([^\]]*)\]\(https?://github\.com/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_.-]+)/?[^)]*\)"
 
-    for line in content.split('\n'):
+    for line in content.split("\n"):
         for match in re.finditer(pattern, line):
             owner, repo = match.group(2), match.group(3)
             # Skip common non-repo paths and self-references
             if owner.lower() in GITHUB_NON_REPO_OWNERS:
                 continue
-            if 'awesome-' in repo.lower():
+            if "awesome-" in repo.lower():
                 continue
             # Clean trailing artifacts
-            repo = repo.rstrip('/').split('#')[0].split('?')[0]
+            repo = repo.rstrip("/").split("#")[0].split("?")[0]
             if repo and owner:
                 repos.add(f"{owner}/{repo}")
 
@@ -104,7 +157,7 @@ def fetch_github_repo_details(owner, repo):
 
 def fetch_awesome_lists():
     """Fetch repos from curated awesome lists via raw README + GitHub API"""
-    print("\n[1/5] Fetching from curated awesome lists...")
+    print("\n[1/6] Fetching from curated awesome lists...")
 
     awesome_repos = {}
 
@@ -114,9 +167,7 @@ def fetch_awesome_lists():
         try:
             # Fetch README raw content
             resp = requests.get(
-                list_info["url"],
-                headers={"User-Agent": "Mozilla/5.0"},
-                timeout=15
+                list_info["url"], headers={"User-Agent": "Mozilla/5.0"}, timeout=15
             )
 
             if resp.status_code != 200:
@@ -132,7 +183,7 @@ def fetch_awesome_lists():
                 if repo_full_name in awesome_repos:
                     continue
 
-                parts = repo_full_name.split('/', 1)
+                parts = repo_full_name.split("/", 1)
                 if len(parts) != 2:
                     continue
 
@@ -180,7 +231,7 @@ def search_github_repos(query, min_stars=1000, per_page=30):
 
 def fetch_from_api():
     """Fetch repos via GitHub API"""
-    print("\n[2/5] Fetching 2026 repos via API...")
+    print("\n[2/6] Fetching 2026 repos via API...")
     api_repos = {}
     seen = set()
 
@@ -217,7 +268,7 @@ def fetch_trending_repos():
     GitHub discontinued the /trending HTML page in 2022–2023.
     We use recent activity queries as a substitute.
     """
-    print("\n[3/5] Fetching trending repos via API...")
+    print("\n[3/6] Fetching trending repos via API...")
 
     trending_repos = {}
 
@@ -226,8 +277,8 @@ def fetch_trending_repos():
     three_months_ago = (today - timedelta(days=90)).strftime("%Y-%m-%d")
 
     queries = [
-        f"pushed:>{one_month_ago} stars:>2000",       # Recently active
-        f"created:>{three_months_ago} stars:>1000",   # Newly created hot repos
+        f"pushed:>{one_month_ago} stars:>2000",  # Recently active
+        f"created:>{three_months_ago} stars:>1000",  # Newly created hot repos
     ]
 
     for q in queries:
@@ -243,6 +294,132 @@ def fetch_trending_repos():
 
     print(f"  ✅ Collected {len(trending_repos)} repos from Trending")
     return trending_repos
+
+
+def fetch_hackernews():
+    """Fetch trending repos from Hacker News API"""
+    print("\n[3.5/6] Fetching from Hacker News...")
+
+    hn_repos = {}
+
+    try:
+        # Get top stories
+        resp = requests.get(
+            "https://hacker-news.firebaseio.com/v0/topstories.json", timeout=10
+        )
+        if resp.status_code != 200:
+            print(f"  Failed to fetch HN stories ({resp.status_code})")
+            return hn_repos
+
+        story_ids = resp.json()[:30]  # Top 30 stories
+
+        for story_id in story_ids:
+            try:
+                story_resp = requests.get(
+                    f"https://hacker-news.firebaseio.com/v0/item/{story_id}.json",
+                    timeout=10,
+                )
+                if story_resp.status_code != 200:
+                    continue
+
+                story = story_resp.json()
+                url = story.get("url", "")
+
+                # Check if it's a GitHub repo
+                if "github.com" in url:
+                    match = re.search(
+                        r"github\.com/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_.-]+)", url
+                    )
+                    if match:
+                        owner, repo = match.group(1), match.group(2)
+                        full_name = f"{owner}/{repo}"
+
+                        if full_name not in hn_repos:
+                            details = fetch_github_repo_details(owner, repo)
+                            if details:
+                                hn_repos[full_name] = format_api_repo(details)
+                                hn_repos[full_name]["source"] = "hackernews"
+                                hn_repos[full_name]["description"] = story.get(
+                                    "title", details.get("description", "")
+                                )
+
+                time.sleep(0.2)
+            except Exception:
+                continue
+
+        print(f"  ✅ Collected {len(hn_repos)} repos from Hacker News")
+
+    except Exception as e:
+        print(f"  Error: {e}")
+
+    return hn_repos
+
+
+def fetch_devto_articles():
+    """Fetch trending articles from DEV.to and extract GitHub repos"""
+    print("\n[4/6] Fetching from DEV.to...")
+
+    devto_repos = {}
+
+    try:
+        # Get top articles
+        resp = requests.get(
+            "https://dev.to/api/articles",
+            params={"per_page": 50, "top": 7},
+            headers={"User-Agent": "Mozilla/5.0"},
+            timeout=15,
+        )
+
+        if resp.status_code != 200:
+            print(f"  Failed to fetch DEV.to articles ({resp.status_code})")
+            return devto_repos
+
+        articles = resp.json()
+
+        seen = set()
+        for article in articles:
+            # Look for GitHub URLs in tags and body
+            github_pattern = r"github\.com/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_.-]+)"
+
+            for tag in article.get("tag_list", []):
+                match = re.search(github_pattern, tag)
+                if match:
+                    owner, repo = match.group(1), match.group(2)
+                    full_name = f"{owner}/{repo}"
+                    if full_name not in seen and full_name not in devto_repos:
+                        seen.add(full_name)
+                        details = fetch_github_repo_details(owner, repo)
+                        if details:
+                            devto_repos[full_name] = format_api_repo(details)
+                            devto_repos[full_name]["source"] = "devto"
+                            devto_repos[full_name]["description"] = article.get(
+                                "title", details.get("description", "")
+                            )
+
+            # Also check the article URL
+            article_url = article.get("url", "")
+            match = re.search(github_pattern, article_url)
+            if match:
+                owner, repo = match.group(1), match.group(2)
+                full_name = f"{owner}/{repo}"
+                if full_name not in seen and full_name not in devto_repos:
+                    seen.add(full_name)
+                    details = fetch_github_repo_details(owner, repo)
+                    if details:
+                        devto_repos[full_name] = format_api_repo(details)
+                        devto_repos[full_name]["source"] = "devto"
+                        devto_repos[full_name]["description"] = article.get(
+                            "title", details.get("description", "")
+                        )
+
+            time.sleep(0.1)
+
+        print(f"  ✅ Collected {len(devto_repos)} repos from DEV.to")
+
+    except Exception as e:
+        print(f"  Error: {e}")
+
+    return devto_repos
 
 
 def parse_num(text):
@@ -272,7 +449,7 @@ def format_api_repo(r):
         "today_stars": 0,
         "score": r["stargazers_count"],
         "fetched_at": datetime.now().isoformat(),
-        "source": "github_api"
+        "source": "github_api",
     }
 
 
@@ -287,7 +464,7 @@ def calculate_score(repo):
 
 def merge_and_sort(all_repos):
     """Merge all sources and sort by score"""
-    print(f"\n[4/5] Processing {len(all_repos)} total repos...")
+    print(f"\n[5/6] Processing {len(all_repos)} total repos...")
 
     # Deduplicate by name, keeping highest score and merging sources
     unique = {}
@@ -314,18 +491,18 @@ def merge_and_sort(all_repos):
 
 def save_results(repos):
     """Save to JSON file"""
-    print(f"\n[5/5] Saving results...")
+    print(f"\n[6/6] Saving results...")
 
     output = {
         "fetched_at": datetime.now().isoformat(),
         "total": len(repos),
-        "sources": ["awesome_lists", "github_api", "trending"],
+        "sources": ["awesome_lists", "github_api", "trending", "hackernews", "devto"],
         "criteria": {
             "min_stars": MIN_STARS,
             "min_forks": MIN_FORKS,
-            "awesome_lists": [l["name"] for l in AWESOME_LISTS]
+            "awesome_lists": [l["name"] for l in AWESOME_LISTS],
         },
-        "repos": repos
+        "repos": repos,
     }
 
     # Ensure data directory exists
@@ -351,14 +528,16 @@ def print_top_repos(repos):
             icon = "📈"
         else:
             icon = "📦"
-        print(f"  {i:2}. {icon} {repo['name']:<45} ⭐{repo['stars']:>7,}  评分:{repo['score']:>10,.0f}")
+        print(
+            f"  {i:2}. {icon} {repo['name']:<45} ⭐{repo['stars']:>7,}  评分:{repo['score']:>10,.0f}"
+        )
         print(f"      {repo['language']:<12} | {repo['description'][:50]}...")
 
 
 def main():
     print("=" * 60)
     print("🏆 GitHub Treasure Repo Scraper")
-    print("   Sources: Awesome Lists + GitHub API + Trending")
+    print("   Sources: Awesome Lists + GitHub API + HN + DEV.to")
     print("=" * 60)
     print(f"\nStarted at {datetime.now().isoformat()}")
 
@@ -372,12 +551,16 @@ def main():
     awesome_repos = fetch_awesome_lists()
     api_repos = fetch_from_api()
     trending_repos = fetch_trending_repos()
+    hn_repos = fetch_hackernews()
+    devto_repos = fetch_devto_articles()
 
     # Merge all repos
     all_repos = {}
     all_repos.update(awesome_repos)
     all_repos.update(api_repos)
     all_repos.update(trending_repos)
+    all_repos.update(hn_repos)
+    all_repos.update(devto_repos)
 
     # Process and save
     repos = merge_and_sort(all_repos)

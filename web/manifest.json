@@ -1,0 +1,16 @@
+{
+  "name": "GitHub Treasure Repo",
+  "short_name": "Repo Hoarder",
+  "description": "Discover quality GitHub projects with smart filtering",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0c0c0e",
+  "theme_color": "#0c0c0e",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230c0c0e' width='100' height='100' rx='20'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='%23ededef'>T</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
