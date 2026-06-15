@@ -95,7 +95,20 @@ const I18N = {
     shareTo: '分享到',
     activityUpdated: '最近更新',
     activityNever: '无更新记录',
-    copiedLink: '已复制链接'
+    copiedLink: '已复制链接',
+    inspirationMode: '灵感模式',
+    inspirationTitle: '灵感发现',
+    inspirationDesc: '左右滑动探索宝藏项目',
+    inspirationNext: '下一个',
+    inspirationPrev: '上一个',
+    inspirationBookmark: '收藏',
+    inspirationOpen: '打开',
+    inspirationSkip: '跳过',
+    inspirationUndo: '撤销',
+    inspirationRedo: '重做',
+    inspirationAutoPlay: '自动播放',
+    inspirationPause: '暂停',
+    inspirationKeyboardHelp: '键盘快捷键'
   },
   en: {
     searchPlaceholder: 'Search projects...',
@@ -119,7 +132,20 @@ const I18N = {
     shareTo: 'Share to',
     activityUpdated: 'Updated',
     activityNever: 'No update record',
-    copiedLink: 'Link copied'
+    copiedLink: 'Link copied',
+    inspirationMode: 'Inspiration Mode',
+    inspirationTitle: 'Discover',
+    inspirationDesc: 'Swipe left/right to explore treasures',
+    inspirationNext: 'Next',
+    inspirationPrev: 'Previous',
+    inspirationBookmark: 'Bookmark',
+    inspirationOpen: 'Open',
+    inspirationSkip: 'Skip',
+    inspirationUndo: 'Undo',
+    inspirationRedo: 'Redo',
+    inspirationAutoPlay: 'Auto-play',
+    inspirationPause: 'Pause',
+    inspirationKeyboardHelp: 'Keyboard Shortcuts'
   },
   zh: {
     searchPlaceholder: '搜索项目名称或描述...',
@@ -1200,6 +1226,7 @@ document.getElementById('modalCloneSsh').addEventListener('click', () => {
 document.getElementById('discoverBtn').addEventListener('click', discoverRandom);
 document.getElementById('recommendBtn').addEventListener('click', showRecommendations);
 document.getElementById('savePresetBtn').addEventListener('click', saveCurrentAsPreset);
+document.getElementById('inspirationModeBtn').addEventListener('click', startInspirationMode);
 document.getElementById('keyboardHelpBtn').addEventListener('click', showKeyboardHelp);
 
 document.getElementById('batchBookmarkAll').addEventListener('click', batchBookmarkAll);
@@ -1760,6 +1787,831 @@ function updatePresetsUI() {
       }
     });
   });
+}
+
+// ============================================
+// Inspiration Mode - Enterprise Edition
+// Features: State persistence, accessibility, performance, UX polish
+// ============================================
+
+/**
+ * @typedef {Object} InspirationConfig
+ * @property {number} autoPlayDelay - Delay between auto-play slides (ms)
+ * @property {number} swipeThreshold - Minimum swipe distance to trigger action
+ * @property {number} animationDuration - Slide animation duration (ms)
+ * @property {boolean} soundEnabled - Enable sound effects
+ * @property {boolean} hapticEnabled - Enable haptic feedback on mobile
+ * @property {number} maxHistory - Maximum undo history size
+ */
+
+/** @type {InspirationConfig} */
+const INSPIRATION_CONFIG = {
+  autoPlayDelay: 5000,
+  swipeThreshold: 80,
+  animationDuration: 300,
+  soundEnabled: false,
+  hapticEnabled: true,
+  maxHistory: 50
+};
+
+/** @type {Set<string>} */
+const seenRepos = new Set();
+
+const InspirationMode = {
+  // State
+  repos: [],
+  index: 0,
+  history: [],
+  historyIndex: -1,
+  isActive: false,
+  isAnimating: false,
+  isFlipped: false,
+  autoPlayInterval: null,
+  filterLanguage: '',
+  touchStartX: 0,
+  touchStartY: 0,
+  currentTranslateX: 0,
+  focusedElement: null,
+
+  // Storage keys
+  STORAGE_SEEN: 'inspiration_seen_repos',
+  STORAGE_POSITION: 'inspiration_last_position',
+
+  start(language = '') {
+    this.filterLanguage = language;
+    this.repos = this.getFilteredRepos();
+    
+    if (this.repos.length === 0) {
+      showToast(currentLang === 'zh' ? '没有找到匹配的项目' : 'No matching projects found');
+      return;
+    }
+
+    this.loadSeenRepos();
+    this.index = this.getLastPosition();
+    this.history = [this.index];
+    this.historyIndex = 0;
+    this.isActive = true;
+    this.isFlipped = false;
+    this.stopAutoPlay();
+    this.preloadAdjacentCards();
+    this.render();
+    this.bindKeyboard();
+    this.saveState();
+    
+    const modal = document.getElementById('detailModal');
+    modal.classList.add('inspiration-modal');
+    document.getElementById('modalOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    this.announce(currentLang === 'zh' 
+      ? `灵感模式已启动，共 ${this.repos.length} 个项目`
+      : `Inspiration mode started, ${this.repos.length} projects`);
+  },
+
+  getFilteredRepos() {
+    let repos = [...allRepos];
+    if (this.filterLanguage) {
+      repos = repos.filter(r => r.language === this.filterLanguage);
+    }
+    repos = repos.filter(r => !this.isSeen(r.name));
+    return repos.sort(() => Math.random() - 0.5);
+  },
+
+  isSeen(repoName) {
+    return seenRepos.has(repoName);
+  },
+
+  markAsSeen(repoName) {
+    seenRepos.add(repoName);
+    this.persistSeenRepos();
+  },
+
+  loadSeenRepos() {
+    try {
+      const saved = localStorage.getItem(this.STORAGE_SEEN);
+      if (saved) {
+        JSON.parse(saved).forEach(name => seenRepos.add(name));
+      }
+    } catch (e) {
+      seenRepos.clear();
+    }
+  },
+
+  persistSeenRepos() {
+    try {
+      localStorage.setItem(this.STORAGE_SEEN, JSON.stringify([...seenRepos]));
+    } catch (e) {}
+  },
+
+  getLastPosition() {
+    try {
+      const saved = localStorage.getItem(this.STORAGE_POSITION);
+      if (saved) {
+        const pos = JSON.parse(saved);
+        if (pos.filterLanguage === this.filterLanguage) {
+          return Math.min(pos.index || 0, this.repos.length - 1);
+        }
+      }
+    } catch (e) {}
+    return 0;
+  },
+
+  saveState() {
+    try {
+      localStorage.setItem(this.STORAGE_POSITION, JSON.stringify({
+        index: this.index,
+        filterLanguage: this.filterLanguage
+      }));
+    } catch (e) {}
+  },
+
+  get currentRepo() {
+    return this.repos[this.index];
+  },
+
+  get progress() {
+    return ((this.index + 1) / this.repos.length) * 100;
+  },
+
+  get hasNext() {
+    return this.index < this.repos.length - 1;
+  },
+
+  get hasPrev() {
+    return this.index > 0;
+  },
+
+  get seenCount() {
+    return seenRepos.size;
+  },
+
+  next() {
+    if (!this.hasNext || this.isAnimating) return;
+    this.markAsSeen(this.currentRepo.name);
+    this.history = this.history.slice(0, this.historyIndex + 1);
+    this.history.push(this.index + 1);
+    if (this.history.length > INSPIRATION_CONFIG.maxHistory) {
+      this.history.shift();
+    } else {
+      this.historyIndex++;
+    }
+    this.index++;
+    this.isFlipped = false;
+    this.animateSlide('next');
+    this.preloadAdjacentCards();
+    this.saveState();
+  },
+
+  prev() {
+    if (!this.hasPrev || this.isAnimating) return;
+    this.history = this.history.slice(0, this.historyIndex + 1);
+    this.history.push(this.index - 1);
+    if (this.history.length > INSPIRATION_CONFIG.maxHistory) {
+      this.history.shift();
+    } else {
+      this.historyIndex++;
+    }
+    this.index--;
+    this.isFlipped = false;
+    this.animateSlide('prev');
+    this.saveState();
+  },
+
+  goTo(idx) {
+    if (idx < 0 || idx >= this.repos.length || this.isAnimating) return;
+    this.markAsSeen(this.repos[idx].name);
+    this.history = this.history.slice(0, this.historyIndex + 1);
+    this.history.push(idx);
+    if (this.history.length > INSPIRATION_CONFIG.maxHistory) {
+      this.history.shift();
+    } else {
+      this.historyIndex++;
+    }
+    this.index = idx;
+    this.isFlipped = false;
+    this.animateSlide(idx > this.index ? 'next' : 'prev');
+    this.saveState();
+  },
+
+  first() {
+    if (this.index !== 0) this.goTo(0);
+  },
+
+  last() {
+    if (this.index !== this.repos.length - 1) {
+      this.goTo(this.repos.length - 1);
+    }
+  },
+
+  undo() {
+    if (this.historyIndex <= 0 || this.isAnimating) return;
+    this.historyIndex--;
+    this.index = this.history[this.historyIndex];
+    this.isFlipped = false;
+    this.animateSlide('prev');
+    this.saveState();
+  },
+
+  redo() {
+    if (this.historyIndex >= this.history.length - 1 || this.isAnimating) return;
+    this.historyIndex++;
+    this.index = this.history[this.historyIndex];
+    this.isFlipped = false;
+    this.animateSlide('next');
+    this.saveState();
+  },
+
+  toggleBookmark() {
+    if (!this.currentRepo) return;
+    toggleBookmark(this.currentRepo.name);
+    this.updateBookmarkBtn();
+    const isBookmarked = bookmarkedRepos.has(this.currentRepo.name);
+    showToast(isBookmarked 
+      ? (currentLang === 'zh' ? '已收藏' : 'Bookmarked')
+      : (currentLang === 'zh' ? '已取消收藏' : 'Removed bookmark'));
+    this.hapticFeedback('medium');
+  },
+
+  openInGithub() {
+    if (!this.currentRepo) return;
+    window.open(this.currentRepo.url, '_blank');
+  },
+
+  shareToTwitter() {
+    if (!this.currentRepo) return;
+    const repo = this.currentRepo;
+    const text = currentLang === 'zh'
+      ? `发现宝藏项目: ${repo.name} - ${repo.description || ''}`
+      : `Discovered treasure: ${repo.name} - ${repo.description || ''}`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(repo.url)}`;
+    window.open(url, '_blank', 'width=550,height=420');
+  },
+
+  toggleFlip() {
+    this.isFlipped = !this.isFlipped;
+    const cardContent = document.getElementById('inspirationCardContent');
+    if (cardContent) {
+      cardContent.classList.toggle('flipped', this.isFlipped);
+    }
+    this.hapticFeedback('light');
+  },
+
+  startAutoPlay() {
+    if (this.autoPlayInterval) return;
+    this.autoPlayInterval = setInterval(() => {
+      if (this.hasNext) {
+        this.next();
+      } else {
+        this.stopAutoPlay();
+        this.announce(currentLang === 'zh' ? '自动播放已结束' : 'Auto-play finished');
+      }
+    }, INSPIRATION_CONFIG.autoPlayDelay);
+    this.updateAutoPlayBtn();
+    this.announce(currentLang === 'zh' ? '自动播放已开启' : 'Auto-play started');
+  },
+
+  stopAutoPlay() {
+    if (this.autoPlayInterval) {
+      clearInterval(this.autoPlayInterval);
+      this.autoPlayInterval = null;
+    }
+    this.updateAutoPlayBtn();
+  },
+
+  toggleAutoPlay() {
+    if (this.autoPlayInterval) {
+      this.stopAutoPlay();
+    } else {
+      this.startAutoPlay();
+    }
+  },
+
+  setFilter(language) {
+    this.filterLanguage = language;
+    this.repos = this.getFilteredRepos();
+    if (this.repos.length === 0) {
+      showToast(currentLang === 'zh' ? '该语言没有未浏览的项目' : 'No unread projects in this language');
+      this.close();
+      return;
+    }
+    this.index = 0;
+    this.history = [0];
+    this.historyIndex = 0;
+    this.isFlipped = false;
+    this.render();
+    this.saveState();
+    this.announce(currentLang === 'zh' 
+      ? `已切换到 ${language || '全部'}，共 ${this.repos.length} 个项目`
+      : `Switched to ${language || 'all'}, ${this.repos.length} projects`);
+  },
+
+  preloadAdjacentCards() {
+    const preloadIndices = [this.index - 1, this.index + 1];
+    preloadIndices.forEach(idx => {
+      if (idx >= 0 && idx < this.repos.length) {
+        const img = new Image();
+      }
+    });
+  },
+
+  animateSlide(direction) {
+    this.isAnimating = true;
+    const card = document.getElementById('inspirationCard');
+    const cardContent = document.getElementById('inspirationCardContent');
+    if (!cardContent) return;
+
+    const transformOut = direction === 'next' 
+      ? 'translateX(-120%) rotate(-8deg)' 
+      : 'translateX(120%) rotate(8deg)';
+    
+    cardContent.style.transition = `transform ${INSPIRATION_CONFIG.animationDuration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity ${INSPIRATION_CONFIG.animationDuration}ms ease`;
+    cardContent.style.transform = transformOut;
+    cardContent.style.opacity = '0';
+
+    setTimeout(() => {
+      this.render();
+      this.updateFocus();
+      
+      cardContent.style.transition = 'none';
+      const transformIn = direction === 'next' 
+        ? 'translateX(100%)' 
+        : 'translateX(-100%)';
+      cardContent.style.transform = transformIn;
+      cardContent.style.opacity = '0';
+      
+      requestAnimationFrame(() => {
+        cardContent.style.transition = `transform ${INSPIRATION_CONFIG.animationDuration + 50}ms cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity ${INSPIRATION_CONFIG.animationDuration}ms ease`;
+        cardContent.style.transform = 'translateX(0) rotate(0)';
+        cardContent.style.opacity = '1';
+        this.isAnimating = false;
+        this.announce(this.getCurrentAnnouncement());
+      });
+    }, INSPIRATION_CONFIG.animationDuration);
+  },
+
+  getCurrentAnnouncement() {
+    const repo = this.currentRepo;
+    if (!repo) return '';
+    const isBookmarked = bookmarkedRepos.has(repo.name);
+    return `${this.index + 1} of ${this.repos.length}: ${repo.name}. Stars: ${fmtNum(repo.stars)}. ${isBookmarked ? 'Bookmarked.' : ''}`;
+  },
+
+  announce(message) {
+    const liveRegion = document.getElementById('inspirationLiveRegion');
+    if (liveRegion) {
+      liveRegion.textContent = message;
+    }
+  },
+
+  hapticFeedback(style = 'light') {
+    if (!INSPIRATION_CONFIG.hapticEnabled) return;
+    if ('vibrate' in navigator) {
+      const durations = { light: 10, medium: 20, heavy: 30 };
+      navigator.vibrate(durations[style] || 10);
+    }
+  },
+
+  handleSwipe(deltaX, deltaY) {
+    const threshold = INSPIRATION_CONFIG.swipeThreshold;
+    const velocity = Math.abs(deltaX) / Math.max(Math.abs(deltaY), 1);
+    
+    if (velocity < 0.5) return;
+    
+    if (deltaX > threshold) {
+      this.hapticFeedback('light');
+      this.prev();
+    } else if (deltaX < -threshold) {
+      this.hapticFeedback('light');
+      this.next();
+    }
+    
+    this.updateSwipeIndicator(0);
+  },
+
+  updateSwipeIndicator(deltaX) {
+    const indicator = document.getElementById('swipeIndicator');
+    if (!indicator) return;
+    
+    const maxOffset = 100;
+    const offset = Math.max(-maxOffset, Math.min(maxOffset, deltaX));
+    const opacity = Math.min(Math.abs(deltaX) / maxOffset, 1);
+    
+    if (deltaX > 20) {
+      indicator.innerHTML = '←';
+      indicator.style.color = 'var(--accent)';
+      indicator.style.opacity = opacity;
+    } else if (deltaX < -20) {
+      indicator.innerHTML = '→';
+      indicator.style.color = 'var(--accent-secondary)';
+      indicator.style.opacity = opacity;
+    } else {
+      indicator.style.opacity = '0';
+    }
+  },
+
+  updateBookmarkBtn() {
+    const btn = document.getElementById('inspirationBookmark');
+    if (!btn || !this.currentRepo) return;
+    const isBookmarked = bookmarkedRepos.has(this.currentRepo.name);
+    btn.classList.toggle('active', isBookmarked);
+    btn.querySelector('svg').setAttribute('fill', isBookmarked ? 'currentColor' : 'none');
+  },
+
+  updateAutoPlayBtn() {
+    const btn = document.getElementById('inspirationAutoPlay');
+    if (!btn) return;
+    const isPlaying = !!this.autoPlayInterval;
+    btn.classList.toggle('playing', isPlaying);
+    
+    const svg = btn.querySelector('svg');
+    if (isPlaying) {
+      svg.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+    } else {
+      svg.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+    }
+    
+    btn.title = isPlaying 
+      ? (currentLang === 'zh' ? '暂停自动播放 (P)' : 'Pause auto-play (P)')
+      : (currentLang === 'zh' ? '自动播放 (P)' : 'Auto-play (P)');
+  },
+
+  updateUndoRedoBtns() {
+    const undoBtn = document.getElementById('inspirationUndo');
+    const redoBtn = document.getElementById('inspirationRedo');
+    if (undoBtn) {
+      undoBtn.style.opacity = this.historyIndex > 0 ? '1' : '0.3';
+      undoBtn.disabled = this.historyIndex <= 0;
+    }
+    if (redoBtn) {
+      redoBtn.style.opacity = this.historyIndex < this.history.length - 1 ? '1' : '0.3';
+      redoBtn.disabled = this.historyIndex >= this.history.length - 1;
+    }
+  },
+
+  updateFocus() {
+    const btn = document.getElementById('inspirationOpen');
+    if (btn) {
+      btn.focus();
+      this.focusedElement = btn;
+    }
+  },
+
+  showKeyboardHelp() {
+    const helpEl = document.getElementById('inspirationHelp');
+    if (!helpEl) return;
+    
+    const shortcuts = [
+      { key: '←', label: currentLang === 'zh' ? '上一个' : 'Previous' },
+      { key: '→', label: currentLang === 'zh' ? '下一个' : 'Next' },
+      { key: 'Space', label: currentLang === 'zh' ? '收藏' : 'Bookmark' },
+      { key: 'Enter', label: currentLang === 'zh' ? '打开 GitHub' : 'Open GitHub' },
+      { key: 'F', label: currentLang === 'zh' ? '翻转卡片' : 'Flip card' },
+      { key: 'T', label: currentLang === 'zh' ? '分享到 X' : 'Share to X' },
+      { key: 'P', label: currentLang === 'zh' ? '自动播放' : 'Auto-play' },
+      { key: 'Home', label: currentLang === 'zh' ? '第一个' : 'First' },
+      { key: 'End', label: currentLang === 'zh' ? '最后一个' : 'Last' },
+      { key: 'U', label: currentLang === 'zh' ? '撤销' : 'Undo' },
+      { key: 'R', label: currentLang === 'zh' ? '重做' : 'Redo' },
+      { key: 'Esc', label: currentLang === 'zh' ? '关闭' : 'Close' }
+    ];
+
+    helpEl.innerHTML = `
+      <div class="inspiration-help-content">
+        <div class="help-title">${currentLang === 'zh' ? '键盘快捷键' : 'Keyboard Shortcuts'}</div>
+        <div class="help-grid">
+          ${shortcuts.map(s => `
+            <div class="help-item">
+              <kbd>${s.key}</kbd>
+              <span>${s.label}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    helpEl.classList.add('visible');
+    setTimeout(() => helpEl.classList.remove('visible'), 4000);
+  },
+
+  render() {
+    if (!this.currentRepo) return;
+
+    const repo = this.currentRepo;
+    const icon = LANG_ICONS[repo.language] || LANG_ICONS['Unknown'];
+    const [author, name] = repo.name.split('/');
+    const isBookmarked = bookmarkedRepos.has(repo.name);
+    const forkRatio = repo.stars > 0 ? ((repo.forks / repo.stars) * 100).toFixed(1) : '0';
+    const isSeen = this.isSeen(repo.name);
+
+    document.getElementById('modalIcon').innerHTML = icon;
+    document.getElementById('modalTitle').textContent = name;
+    document.getElementById('modalAuthor').textContent = author;
+    document.getElementById('modalDesc').innerHTML = `
+      <div class="inspiration-desc">${esc(repo.description || (currentLang === 'zh' ? '暂无描述' : 'No description'))}</div>
+    `;
+
+    document.getElementById('modalStats').innerHTML = `
+      <div class="modal-stat-item">
+        <span class="value">${fmtNum(repo.stars)}</span>
+        <span class="label">Stars</span>
+      </div>
+      <div class="modal-stat-item">
+        <span class="value">${fmtNum(repo.forks)}</span>
+        <span class="label">Forks</span>
+      </div>
+      <div class="modal-stat-item">
+        <span class="value">${forkRatio}%</span>
+        <span class="label">${t('forkRatio')}</span>
+      </div>
+      <div class="modal-stat-item">
+        <span class="value">${fmtNum(repo.score)}</span>
+        <span class="label">${t('scoreUnit')}</span>
+      </div>
+    `;
+
+    document.getElementById('modalSource').textContent = `${t('dataSource')} ${repo.source || 'unknown'}`;
+    document.getElementById('modalGithubLink').href = repo.url;
+    document.getElementById('modalGithubLink').style.display = 'inline-flex';
+
+    const bookmarkBtn = document.getElementById('modalBookmark');
+    bookmarkBtn.style.display = 'flex';
+    bookmarkBtn.classList.toggle('bookmarked', isBookmarked);
+
+    document.getElementById('modalLinks').innerHTML = `
+      <div class="inspiration-card" id="inspirationCard" role="region" aria-label="${currentLang === 'zh' ? '灵感卡片' : 'Inspiration card'}">
+        <div class="inspiration-card-content ${this.isFlipped ? 'flipped' : ''}" id="inspirationCardContent">
+          <div class="inspiration-swipe-indicator" id="swipeIndicator" aria-hidden="true"></div>
+          
+          <div class="inspiration-header">
+            <div class="inspiration-lang-filter">
+              <select id="inspirationLangSelect" aria-label="${currentLang === 'zh' ? '筛选语言' : 'Filter language'}">
+                <option value="">${currentLang === 'zh' ? '全部语言' : 'All Languages'}</option>
+                ${Array.from(languages).sort().map(lang => 
+                  `<option value="${lang}" ${this.filterLanguage === lang ? 'selected' : ''}>${lang}</option>`
+                ).join('')}
+              </select>
+              ${this.filterLanguage ? `
+                <button class="inspiration-filter-clear" id="inspirationFilterClear" 
+                  title="${currentLang === 'zh' ? '清除筛选' : 'Clear Filter'}" aria-label="${currentLang === 'zh' ? '清除语言筛选' : 'Clear language filter'}">×</button>
+              ` : ''}
+            </div>
+            <div class="inspiration-seen-indicator ${isSeen ? 'seen' : ''}" aria-label="${isSeen ? (currentLang === 'zh' ? '已浏览' : 'Seen') : (currentLang === 'zh' ? '未浏览' : 'Unseen')}">
+              ${isSeen ? '✓' : '•'}
+            </div>
+          </div>
+          
+          <div class="inspiration-progress" role="progressbar" aria-valuenow="${this.progress}" aria-valuemin="0" aria-valuemax="100">
+            <div class="inspiration-progress-bar" style="width: ${this.progress}%"></div>
+          </div>
+          
+          <div class="inspiration-counter" aria-live="polite">
+            <span>${this.index + 1} / ${this.repos.length}</span>
+            ${this.filterLanguage ? `<span class="inspiration-filter-tag">${this.filterLanguage}</span>` : ''}
+            <span class="inspiration-seen-count">(${this.seenCount} ${currentLang === 'zh' ? '已浏览' : 'seen'})</span>
+          </div>
+          
+          <div class="inspiration-controls">
+            <div class="inspiration-nav" role="navigation" aria-label="${currentLang === 'zh' ? '导航' : 'Navigation'}">
+              <button class="inspiration-nav-btn" id="inspirationPrev" ${!this.hasPrev ? 'disabled' : ''} 
+                aria-label="${currentLang === 'zh' ? '上一个' : 'Previous'}" ${!this.hasPrev ? 'aria-disabled="true"' : ''}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+              </button>
+              <button class="inspiration-nav-btn" id="inspirationNext" ${!this.hasNext ? 'disabled' : ''} 
+                aria-label="${currentLang === 'zh' ? '下一个' : 'Next'}" ${!this.hasNext ? 'aria-disabled="true"' : ''}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </button>
+            </div>
+            
+            <div class="inspiration-actions" role="toolbar" aria-label="${currentLang === 'zh' ? '操作' : 'Actions'}">
+              <button class="inspiration-btn" id="inspirationUndo" title="${currentLang === 'zh' ? '撤销 (U)' : 'Undo (U)'}" 
+                aria-label="${currentLang === 'zh' ? '撤销' : 'Undo'}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 7"/>
+                </svg>
+              </button>
+              <button class="inspiration-btn skip" id="inspirationSkip" title="${currentLang === 'zh' ? '跳过' : 'Skip'}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/>
+                </svg>
+              </button>
+              <button class="inspiration-btn bookmark ${isBookmarked ? 'active' : ''}" id="inspirationBookmark" 
+                title="${currentLang === 'zh' ? '收藏 (Space)' : 'Bookmark (Space)'}"
+                aria-label="${currentLang === 'zh' ? '收藏' : 'Bookmark'}" aria-pressed="${isBookmarked}">
+                <svg viewBox="0 0 24 24" fill="${isBookmarked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                </svg>
+              </button>
+              <button class="inspiration-btn flip" id="inspirationFlip" title="${currentLang === 'zh' ? '翻转 (F)' : 'Flip (F)'}"
+                aria-label="${currentLang === 'zh' ? '翻转卡片查看详情' : 'Flip card for details'}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M1 4v6h6"/><path d="M23 20v-6h-6"/>
+                  <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                </svg>
+              </button>
+              <button class="inspiration-btn open" id="inspirationOpen" title="${currentLang === 'zh' ? '打开 GitHub (Enter)' : 'Open GitHub (Enter)'}"
+                aria-label="${currentLang === 'zh' ? '在 GitHub 打开' : 'Open on GitHub'}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                  <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+              </button>
+              <button class="inspiration-btn share" id="inspirationShare" title="${currentLang === 'zh' ? '分享 (T)' : 'Share (T)'}"
+                aria-label="${currentLang === 'zh' ? '分享到 X' : 'Share to X'}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                  <polyline points="16 6 12 2 8 6"/>
+                  <line x1="12" y1="2" x2="12" y2="15"/>
+                </svg>
+              </button>
+              <button class="inspiration-btn" id="inspirationAutoPlay" title="${currentLang === 'zh' ? '自动播放 (P)' : 'Auto-play (P)'}"
+                aria-label="${currentLang === 'zh' ? '自动播放' : 'Auto-play'}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+              </button>
+              <button class="inspiration-btn" id="inspirationRedo" title="${currentLang === 'zh' ? '重做 (R)' : 'Redo (R)'}"
+                aria-label="${currentLang === 'zh' ? '重做' : 'Redo'}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <div class="inspiration-help" id="inspirationHelp" role="region" aria-label="${currentLang === 'zh' ? '帮助' : 'Help'}"></div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('modalBookmark').style.display = 'none';
+    document.getElementById('modalCopyUrl').style.display = 'none';
+    document.getElementById('cloneCommands').style.display = 'none';
+
+    this.bindEvents();
+    this.updateUndoRedoBtns();
+    this.updateAutoPlayBtn();
+  },
+
+  bindEvents() {
+    const delegate = (id, event, handler) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener(event, handler);
+    };
+
+    delegate('inspirationPrev', 'click', () => this.prev());
+    delegate('inspirationNext', 'click', () => this.next());
+    delegate('inspirationSkip', 'click', () => this.next());
+    delegate('inspirationBookmark', 'click', () => this.toggleBookmark());
+    delegate('inspirationOpen', 'click', () => this.openInGithub());
+    delegate('inspirationFlip', 'click', () => this.toggleFlip());
+    delegate('inspirationShare', 'click', () => this.shareToTwitter());
+    delegate('inspirationAutoPlay', 'click', () => this.toggleAutoPlay());
+    delegate('inspirationUndo', 'click', () => this.undo());
+    delegate('inspirationRedo', 'click', () => this.redo());
+
+    const langSelect = document.getElementById('inspirationLangSelect');
+    if (langSelect) {
+      langSelect.addEventListener('change', (e) => this.setFilter(e.target.value));
+    }
+
+    const filterClear = document.getElementById('inspirationFilterClear');
+    if (filterClear) {
+      filterClear.addEventListener('click', () => this.setFilter(''));
+    }
+
+    const card = document.getElementById('inspirationCard');
+    if (card) {
+      card.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: true });
+      card.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: true });
+      card.addEventListener('touchend', (e) => this.onTouchEnd(e), { passive: true });
+    }
+  },
+
+  onTouchStart(e) {
+    this.touchStartX = e.touches[0].clientX;
+    this.touchStartY = e.touches[0].clientY;
+    this.currentTranslateX = 0;
+  },
+
+  onTouchMove(e) {
+    const deltaX = e.touches[0].clientX - this.touchStartX;
+    const deltaY = e.touches[0].clientY - this.touchStartY;
+    this.currentTranslateX = deltaX;
+    this.updateSwipeIndicator(deltaX);
+
+    const cardContent = document.getElementById('inspirationCardContent');
+    if (cardContent) {
+      const rotation = deltaX * 0.015;
+      const scale = 1 - Math.abs(deltaX) * 0.0005;
+      cardContent.style.transform = `translateX(${deltaX * 0.25}px) rotate(${rotation}deg) scale(${Math.max(0.95, scale)})`;
+    }
+  },
+
+  onTouchEnd(e) {
+    const deltaX = this.currentTranslateX;
+    this.handleSwipe(deltaX, 0);
+
+    const cardContent = document.getElementById('inspirationCardContent');
+    if (cardContent) {
+      cardContent.style.transform = '';
+    }
+  },
+
+  bindKeyboard() {
+    document.addEventListener('keydown', this.keyboardHandler);
+  },
+
+  unbindKeyboard() {
+    document.removeEventListener('keydown', this.keyboardHandler);
+  },
+
+  keyboardHandler: (e) => {
+    if (!this.isActive) return;
+    
+    switch(e.key) {
+      case 'ArrowLeft':
+        e.preventDefault();
+        this.prev();
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        this.next();
+        break;
+      case ' ':
+        e.preventDefault();
+        this.toggleBookmark();
+        break;
+      case 'Enter':
+        e.preventDefault();
+        this.openInGithub();
+        break;
+      case 'f':
+      case 'F':
+        e.preventDefault();
+        this.toggleFlip();
+        break;
+      case 't':
+      case 'T':
+        e.preventDefault();
+        this.shareToTwitter();
+        break;
+      case 'p':
+      case 'P':
+        e.preventDefault();
+        this.toggleAutoPlay();
+        break;
+      case 'u':
+      case 'U':
+        e.preventDefault();
+        this.undo();
+        break;
+      case 'r':
+      case 'R':
+        e.preventDefault();
+        this.redo();
+        break;
+      case 'Home':
+        e.preventDefault();
+        this.first();
+        break;
+      case 'End':
+        e.preventDefault();
+        this.last();
+        break;
+      case '?':
+        e.preventDefault();
+        this.showKeyboardHelp();
+        break;
+      case 'Escape':
+        e.preventDefault();
+        this.close();
+        break;
+    }
+  },
+
+  close() {
+    this.isActive = false;
+    this.stopAutoPlay();
+    this.unbindKeyboard();
+    this.markAsSeen(this.currentRepo?.name);
+    const modal = document.getElementById('detailModal');
+    modal.classList.remove('inspiration-modal');
+    document.getElementById('modalOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+    this.announce(currentLang === 'zh' ? '灵感模式已关闭' : 'Inspiration mode closed');
+  }
+};
+
+function startInspirationMode(language = '') {
+  InspirationMode.start(language);
+}
+
+function openInspirationModal() {
+  const modal = document.getElementById('detailModal');
+  modal.classList.add('inspiration-modal');
 }
 
 // Init

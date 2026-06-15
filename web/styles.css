@@ -2161,3 +2161,414 @@ body {
 .activity-dot {
   font-size: 0.6rem;
 }
+
+/* ============================================
+   Screen Reader Only (Accessibility)
+   ============================================ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============================================
+   Inspiration Mode - Enterprise Edition
+   ============================================ */
+
+.modal.inspiration-modal {
+  max-width: 520px;
+  padding: 24px;
+  text-align: center;
+}
+
+.inspiration-card {
+  position: relative;
+  overflow: hidden;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.inspiration-card-content {
+  position: relative;
+  will-change: transform;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-style: preserve-3d;
+}
+
+.inspiration-card-content.flipped {
+  transform: rotateY(180deg);
+}
+
+.inspiration-swipe-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 4rem;
+  font-weight: bold;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+  text-shadow: 0 4px 12px var(--shadow);
+  transition: opacity 0.15s ease;
+}
+
+.inspiration-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.inspiration-seen-indicator {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: var(--bg-soft);
+  transition: all 0.2s ease;
+}
+
+.inspiration-seen-indicator.seen {
+  color: var(--accent);
+  background: rgba(233, 69, 96, 0.1);
+}
+
+.inspiration-seen-count {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.inspiration-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 20px;
+  min-height: 50px;
+}
+
+.inspiration-progress {
+  width: 100%;
+  height: 5px;
+  background: var(--bg-soft);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.inspiration-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+  border-radius: 3px;
+  transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.inspiration-counter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-bottom: 20px;
+}
+
+.inspiration-filter-tag {
+  padding: 2px 8px;
+  background: var(--accent);
+  color: white;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-family: var(--font-sans);
+}
+
+.inspiration-lang-filter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.inspiration-lang-filter select {
+  padding: 6px 10px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.inspiration-lang-filter select:hover,
+.inspiration-lang-filter select:focus {
+  border-color: var(--accent);
+}
+
+.inspiration-filter-clear {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.inspiration-filter-clear:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.inspiration-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inspiration-nav {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.inspiration-nav-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
+}
+
+.inspiration-nav-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.inspiration-nav-btn:hover:not(:disabled) {
+  background: var(--bg-card-hover);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.05);
+}
+
+.inspiration-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.inspiration-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.inspiration-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 16px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  min-width: 48px;
+}
+
+.inspiration-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.inspiration-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-light);
+  color: var(--text);
+  transform: translateY(-2px);
+}
+
+.inspiration-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.inspiration-btn.skip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.inspiration-btn.bookmark.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  box-shadow: 0 4px 12px rgba(233, 69, 96, 0.3);
+}
+
+.inspiration-btn.bookmark.active:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  box-shadow: 0 6px 16px rgba(233, 69, 96, 0.4);
+}
+
+.inspiration-btn.bookmark.active svg {
+  fill: white;
+}
+
+.inspiration-btn.open {
+  background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.inspiration-btn.open:hover {
+  background: linear-gradient(135deg, var(--accent-hover), var(--accent-secondary));
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 6px 16px var(--shadow);
+  transform: translateY(-2px);
+}
+
+.inspiration-btn#inspirationAutoPlay.playing {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.inspiration-btn#inspirationAutoPlay.playing svg {
+  fill: currentColor;
+}
+
+.inspiration-btn.flip:hover {
+  border-color: var(--accent-secondary);
+  color: var(--accent-secondary);
+}
+
+.inspiration-btn.share:hover {
+  border-color: #1da1f2;
+  color: #1da1f2;
+}
+
+.inspiration-help {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--bg-soft);
+  border-radius: 10px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.inspiration-help.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.inspiration-help-content {
+  animation: fadeInHelp 0.3s ease;
+}
+
+@keyframes fadeInHelp {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.help-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.help-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.help-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.help-item kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 24px;
+  padding: 0 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text);
+  box-shadow: 0 2px 0 var(--border);
+}
+
+/* Mobile optimizations */
+@media (max-width: 600px) {
+  .modal.inspiration-modal {
+    max-width: 100%;
+    margin: 10px;
+    padding: 20px 16px;
+  }
+
+  .inspiration-btn {
+    padding: 10px 14px;
+    min-width: 44px;
+  }
+
+  .inspiration-btn span {
+    display: none;
+  }
+
+  .inspiration-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .help-grid {
+    grid-template-columns: 1fr;
+  }
+}
