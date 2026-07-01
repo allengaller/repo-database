@@ -111,6 +111,22 @@ def get_headers():
     return headers
 
 
+def fetch_commit_activity(owner, repo):
+    """Return the number of commits in the last 4 weeks (free, no token).
+
+    Used as a freshness/activity signal for trending estimation and scoring.
+    Returns 0 on any failure or when GitHub returns 202 (cache miss).
+    """
+    url = f"https://api.github.com/repos/{owner}/{repo}/stats/commit_activity"
+    try:
+        resp = requests.get(url, headers=get_headers(), timeout=10)
+        if resp.status_code != 200 or not isinstance(resp.json(), list):
+            return 0
+        return sum(w.get("total", 0) for w in resp.json()[-4:])
+    except Exception:
+        return 0
+
+
 def parse_awesome_list(content):
     """Parse awesome list markdown to extract repo URLs"""
     repos = set()
@@ -262,35 +278,105 @@ def fetch_from_api():
     return api_repos
 
 
-def fetch_trending_repos():
+def estimate_today_stars(repo_data):
+    """Estimate daily star growth from push/recency signals.
+
+    GitHub Search API does not return per-day star counts, so we derive a
+    proxy from how recently the repo was pushed and how new it is. Actively
+    pushed repos in the last 24h almost always coincide with a star surge.
+    Scale: 0..~150, roughly matching real daily-star magnitudes.
     """
-    Fetch trending-like repos via Search API.
-    GitHub discontinued the /trending HTML page in 2022–2023.
-    We use recent activity queries as a substitute.
+    try:
+        pushed = datetime.fromisoformat(repo_data["pushed_at"].replace("Z", "+00:00"))
+        created = datetime.fromisoformat(repo_data["created_at"].replace("Z", "+00:00"))
+    except (KeyError, TypeError, ValueError):
+        return 0
+
+    now = datetime.now(pushed.tzinfo) if pushed.tzinfo else datetime.now()
+    hours_since_push = max((now - pushed).total_seconds() / 3600, 0)
+    days_old = max((now - created).total_seconds() / 86400, 1)
+
+    if hours_since_push <= 24:
+        push_score = 100
+    elif hours_since_push <= 72:
+        push_score = 40
+    elif hours_since_push <= 168:  # 1 week
+        push_score = 15
+    else:
+        push_score = 0
+
+    # New repos (<30 days) with high stars get a boost — they're genuinely viral
+    stars = repo_data.get("stargazers_count", 0)
+    if days_old < 30 and stars > 100:
+        push_score += min(int(stars / days_old / 10), 50)
+
+    return int(push_score)
+
+
+def fetch_trending_repos():
+    """Fetch trending-like repos via GitHub Search API.
+
+    GitHub discontinued the /trending HTML page in 2022-2023. We substitute
+    with three complementary queries (recently pushed / recently created /
+    rising-star repos) and enrich each result with an estimated daily-star
+    signal so the frontend's "Surge Index" (today_stars / stars) works.
     """
     print("\n[3/6] Fetching trending repos via API...")
 
     trending_repos = {}
 
     today = datetime.now()
+    one_day_ago = (today - timedelta(days=1)).strftime("%Y-%m-%d")
+    one_week_ago = (today - timedelta(days=7)).strftime("%Y-%m-%d")
     one_month_ago = (today - timedelta(days=30)).strftime("%Y-%m-%d")
     three_months_ago = (today - timedelta(days=90)).strftime("%Y-%m-%d")
 
     queries = [
-        f"pushed:>{one_month_ago} stars:>2000",  # Recently active
-        f"created:>{three_months_ago} stars:>1000",  # Newly created hot repos
+        (f"pushed:>{one_day_ago} stars:>500", "hot-today"),
+        (f"pushed:>{one_week_ago} stars:>2000", "hot-week"),
+        (f"created:>{one_month_ago} stars:>500", "new-month"),
+        (f"created:>{three_months_ago} stars:>1000", "new-quarter"),
+        (f"pushed:>{one_week_ago} stars:100..2000", "rising"),
     ]
 
-    for q in queries:
-        print(f"  Query: {q}...", end=" ")
-        repos = search_github_repos(q, min_stars=500, per_page=25)
+    for q, label in queries:
+        print(f"  [{label}] {q}...", end=" ")
+        repos = search_github_repos(q, min_stars=100, per_page=25)
         print(f"found {len(repos)}")
         for r in repos:
             name = r["full_name"]
-            if name not in trending_repos:
-                trending_repos[name] = format_api_repo(r)
-                trending_repos[name]["source"] = "trending"
+            if name in trending_repos:
+                # Keep the higher today_stars estimate
+                est = estimate_today_stars(r)
+                if est > trending_repos[name].get("today_stars", 0):
+                    trending_repos[name]["today_stars"] = est
+                continue
+            formatted = format_api_repo(r)
+            formatted["today_stars"] = estimate_today_stars(r)
+            formatted["source"] = "trending"
+            trending_repos[name] = formatted
         time.sleep(1)
+
+    # Optional enrichment: real commit_activity for the top-N trending candidates.
+    # This endpoint is free (no token) and returns weekly commit counts.
+    candidates = sorted(
+        trending_repos.values(),
+        key=lambda r: r.get("stars", 0),
+        reverse=True,
+    )[:40]
+    if candidates:
+        print(f"  Enriching {len(candidates)} repos with commit_activity...", end=" ")
+        enriched = 0
+        for repo in candidates:
+            parts = repo["name"].split("/", 1)
+            if len(parts) != 2:
+                continue
+            commits = fetch_commit_activity(parts[0], parts[1])
+            if commits:
+                repo["commit_activity"] = commits
+                enriched += 1
+            time.sleep(0.1)
+        print(f"{enriched} OK")
 
     print(f"  ✅ Collected {len(trending_repos)} repos from Trending")
     return trending_repos
@@ -454,33 +540,60 @@ def format_api_repo(r):
 
 
 def calculate_score(repo):
-    """Calculate treasure score"""
+    """Calculate treasure score.
+
+    score = stars + forks + (forks/stars)*1000 + today_stars*10 + commits_4w*2
+    """
     stars = repo.get("stars", 0)
     forks = repo.get("forks", 0)
     today = repo.get("today_stars", 0)
+    commits = repo.get("commit_activity", 0)
     fork_ratio = forks / stars if stars > 0 else 0
-    return round(stars + forks + fork_ratio * 1000 + today * 10, 2)
+    return round(stars + forks + fork_ratio * 1000 + today * 10 + commits * 2, 2)
 
 
 def merge_and_sort(all_repos):
-    """Merge all sources and sort by score"""
+    """Merge all sources and sort by score.
+
+    For duplicates, take the field-wise max of numeric signals and merge
+    source tags, so a repo appearing in multiple sources is strictly better
+    than any single-source view of it.
+    """
     print(f"\n[5/6] Processing {len(all_repos)} total repos...")
 
-    # Deduplicate by name, keeping highest score and merging sources
     unique = {}
     for repo in all_repos.values():
         name = repo["name"]
-        repo["score"] = calculate_score(repo)
-
-        if name not in unique or repo["score"] > unique[name]["score"]:
-            # Merge source info if repo existed
-            if name in unique:
-                old_source = unique[name].get("source", "unknown")
-                new_source = repo.get("source", "unknown")
-                if old_source != new_source:
-                    sources = sorted({s for s in (old_source, new_source) if s})
-                    repo["source"] = "+".join(sources)
+        if name in unique:
+            existing = unique[name]
+            existing["stars"] = max(existing.get("stars", 0), repo.get("stars", 0))
+            existing["forks"] = max(existing.get("forks", 0), repo.get("forks", 0))
+            existing["today_stars"] = max(
+                existing.get("today_stars", 0), repo.get("today_stars", 0)
+            )
+            existing["commit_activity"] = max(
+                existing.get("commit_activity", 0), repo.get("commit_activity", 0)
+            )
+            if existing.get("language") in (None, "Unknown") and repo.get("language") not in (
+                None,
+                "Unknown",
+            ):
+                existing["language"] = repo["language"]
+            if (not existing.get("description") or existing["description"] == "暂无描述") and repo.get(
+                "description"
+            ):
+                existing["description"] = repo["description"]
+            old_src = existing.get("source", "") or ""
+            new_src = repo.get("source", "") or ""
+            merged_sources = sorted({s for s in (old_src, new_src) if s})
+            existing["source"] = "+".join(merged_sources)
+            if repo.get("fetched_at", "") > existing.get("fetched_at", ""):
+                existing["fetched_at"] = repo["fetched_at"]
+        else:
             unique[name] = repo
+
+    for repo in unique.values():
+        repo["score"] = calculate_score(repo)
 
     result = list(unique.values())
     result.sort(key=lambda x: x["score"], reverse=True)

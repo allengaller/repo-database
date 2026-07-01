@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>唯识种子库 · Vasana PoC</title>
+  <style>
+    /* ========== 基础重置与主题 ========== */
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+    :root {
+      --bg-primary: #0d0d1a;
+      --bg-secondary: #151528;
+      --bg-card: #1a1a35;
+      --bg-input: #12122a;
+      --text-primary: #e8e6f0;
+      --text-secondary: #9896a8;
+      --text-muted: #5d5b6e;
+      --accent-purple: #8b5cf6;
+      --accent-indigo: #6366f1;
+      --accent-blue: #3b82f6;
+      /* 善种子 — 青绿 */
+      --seed-wholesome: #34d399;
+      --seed-wholesome-bg: rgba(52, 211, 153, 0.08);
+      --seed-wholesome-glow: rgba(52, 211, 153, 0.4);
+      /* 不善种子 — 赤红 */
+      --seed-unwholesome: #f87171;
+      --seed-unwholesome-bg: rgba(248, 113, 113, 0.08);
+      --seed-unwholesome-glow: rgba(248, 113, 113, 0.4);
+      /* 无记种子 — 灰蓝 */
+      --seed-neutral: #94a3b8;
+      --seed-neutral-bg: rgba(148, 163, 184, 0.08);
+      --seed-neutral-glow: rgba(148, 163, 184, 0.4);
+      /* 结晶色 */
+      --crystal-gold: #fbbf24;
+      --crystal-glow: rgba(251, 191, 36, 0.6);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.3);
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'JetBrains Mono', 'Noto Sans SC', monospace;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* 背景纹理 */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(99, 102, 241, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(59, 130, 246, 0.03) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 20px 80px;
+    }
+
+    /* ========== 头部标题 ========== */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .header .subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    /* ========== 统计栏 ========== */
+    .stats-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+
+    .stat-chip {
+      background: var(--bg-secondary);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: 20px;
+      padding: 8px 18px;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .stat-chip .stat-icon {
+      font-size: 1rem;
+    }
+
+    .stat-chip .stat-value {
+      font-weight: 600;
+      color: var(--accent-purple);
+      font-size: 1rem;
+    }
+
+    .stat-chip .stat-label {
+      color: var(--text-secondary);
+    }
+
+    .btn-reset {
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.25);
+      color: var(--seed-unwholesome);
+      border-radius: 20px;
+      padding: 8px 18px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+    .btn-reset:hover {
+      background: rgba(248, 113, 113, 0.2);
+      border-color: rgba(248, 113, 113, 0.5);
+    }
+
+    /* ========== 阈值设置 ========== */
+    .threshold-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .threshold-bar label { white-space: nowrap; }
+
+    .threshold-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 120px;
+      height: 4px;
+      background: var(--bg-card);
+      border-radius: 2px;
+      outline: none;
+    }
+    .threshold-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--accent-purple);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
+    }
+
+    .threshold-value {
+      font-weight: 700;
+      color: var(--crystal-gold);
+      min-width: 20px;
+      text-align: center;
+    }
+
+    /* ========== 种子网格 ========== */
+    .section-title {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 14px;
+      padding-left: 4px;
+    }
+
+    .seed-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+
+    .seed-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: var(--radius);
+      padding: 18px;
+      position: relative;
+      transition: var(--transition);
+      overflow: hidden;
+    }
+
+    .seed-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius);
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      pointer-events: none;
+    }
+
+    /* 类型色彩 */
+    .seed-card[data-type="wholesome"] { border-left: 3px solid var(--seed-wholesome); }
+    .seed-card[data-type="wholesome"] .seed-type-tag { color: var(--seed-wholesome); background: var(--seed-wholesome-bg); }
+    .seed-card[data-type="unwholesome"] { border-left: 3px solid var(--seed-unwholesome); }
+    .seed-card[data-type="unwholesome"] .seed-type-tag { color: var(--seed-unwholesome); background: var(--seed-unwholesome-bg); }
+    .seed-card[data-type="neutral"] { border-left: 3px solid var(--seed-neutral); }
+    .seed-card[data-type="neutral"] .seed-type-tag { color: var(--seed-neutral); background: var(--seed-neutral-bg); }
+
+    /* 活跃状态 — 发光边框 */
+    .seed-card.active {
+      animation: glowPulse 1.5s ease-in-out;
+    }
+    .seed-card.active::before {
+      opacity: 1;
+    }
+    .seed-card[data-type="wholesome"].active { border-color: var(--seed-wholesome); box-shadow: 0 0 20px var(--seed-wholesome-glow), inset 0 0 20px rgba(52,211,153,0.05); }
+    .seed-card[data-type="unwholesome"].active { border-color: var(--seed-unwholesome); box-shadow: 0 0 20px var(--seed-unwholesome-glow), inset 0 0 20px rgba(248,113,113,0.05); }
+    .seed-card[data-type="neutral"].active { border-color: var(--seed-neutral); box-shadow: 0 0 20px var(--seed-neutral-glow), inset 0 0 20px rgba(148,163,184,0.05); }
+
+    @keyframes glowPulse {
+      0%   { transform: scale(1); }
+      30%  { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+
+    /* 结晶状态 — 金色纹理 */
+    .seed-card.crystallized {
+      border-color: var(--crystal-gold) !important;
+      box-shadow: 0 0 24px var(--crystal-glow), inset 0 0 30px rgba(251,191,36,0.06) !important;
+    }
+    .seed-card.crystallized::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          60deg,
+          transparent,
+          transparent 8px,
+          rgba(251,191,36,0.03) 8px,
+          rgba(251,191,36,0.03) 16px
+        );
+      border-radius: var(--radius);
+      pointer-events: none;
+      animation: crystalShimmer 4s linear infinite;
+    }
+
+    @keyframes crystalShimmer {
+      0%   { background-position: 0 0; }
+      100% { background-position: 32px 32px; }
+    }
+
+    /* 结晶弹出动画 */
+    @keyframes crystallizeBurst {
+      0%   { transform: scale(1); box-shadow: 0 0 0 0 var(--crystal-glow); }
+      40%  { transform: scale(1.08); box-shadow: 0 0 50px 10px var(--crystal-glow); }
+      100% { transform: scale(1); box-shadow: 0 0 24px var(--crystal-glow); }
+    }
+    .seed-card.crystallizing {
+      animation: crystallizeBurst 1.2s ease-out;
+    }
+
+    .seed-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .seed-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .seed-type-tag {
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+
+    .seed-status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .seed-status {
+      font-size: 0.68rem;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+    .seed-status.dormant   { color: var(--text-muted); background: rgba(255,255,255,0.04); }
+    .seed-status.active-s  { color: #a78bfa; background: rgba(167,139,250,0.12); }
+    .seed-status.crystal   { color: var(--crystal-gold); background: rgba(251,191,36,0.12); font-weight: 700; }
+
+    .seed-count {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+    .seed-count span {
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* 强度条 */
+    .strength-bar-track {
+      width: 100%;
+      height: 5px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .strength-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.6s ease, background 0.4s ease;
+    }
+
+    .seed-card[data-type="wholesome"] .strength-bar-fill { background: linear-gradient(90deg, var(--seed-wholesome), #6ee7b7); }
+    .seed-card[data-type="unwholesome"] .strength-bar-fill { background: linear-gradient(90deg, var(--seed-unwholesome), #fca5a5); }
+    .seed-card[data-type="neutral"] .strength-bar-fill { background: linear-gradient(90deg, var(--seed-neutral), #cbd5e1); }
+    .seed-card.crystallized .strength-bar-fill { background: linear-gradient(90deg, var(--crystal-gold), #fde68a) !important; }
+
+    .seed-strength-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    /* 删除种子按钮 */
+    .seed-delete {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+      padding: 4px;
+      line-height: 1;
+    }
+    .seed-card:hover .seed-delete { opacity: 0.6; }
+    .seed-delete:hover { opacity: 1 !important; color: var(--seed-unwholesome); }
+
+    /* ========== 互动触发区 ========== */
+    .interaction-zone {
+      background: var(--bg-secondary);
+      border: 1px solid rgba(139, 92, 246, 0.1);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+
+    .interaction-zone .section-title {
+      margin-bottom: 12px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .dialog-input {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .dialog-input::placeholder { color: var(--text-muted); }
+    .dialog-input:focus { border-color: var(--accent-purple); }
+
+    .btn-trigger {
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-indigo));
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 12px 24px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+    .btn-trigger:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+    }
+    .btn-trigger:active { transform: translateY(0); }
+
+    /* 触发结果 */
+    .trigger-result {
+      margin-top: 14px;
+      min-height: 24px;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    .trigger-result .activated-seed-name {
+      font-weight: 600;
+      padding: 1px 8px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+    }
+    .trigger-result .activated-seed-name.wholesome  { color: var(--seed-wholesome); background: var(--seed-wholesome-bg); }
+    .trigger-result .activated-seed-name.unwholesome { color: var(--seed-unwholesome); background: var(--seed-unwholesome-bg); }
+    .trigger-result .activated-seed-name.neutral     { color: var(--seed-neutral); background: var(--seed-neutral-bg); }
+
+    .trigger-result .crystal-alert {
+      color: var(--crystal-gold);
+      font-weight: 700;
+      animation: crystalTextPulse 1s ease-in-out 2;
+    }
+
+    @keyframes crystalTextPulse {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0.5; }
+    }
+
+    /* ========== 添加种子表单 ========== */
+    .add-seed-zone {
+      background: var(--bg-secondary);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+
+    .add-seed-form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .add-seed-form .dialog-input {
+      flex: 1;
+      min-width: 160px;
+    }
+
+    .type-select {
+      background: var(--bg-input);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.82rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+    .type-select:focus { border-color: var(--accent-purple); }
+    .type-select option { background: var(--bg-primary); }
+
+    .btn-add {
+      background: rgba(52, 211, 153, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      border-radius: var(--radius-sm);
+      padding: 12px 20px;
+      color: var(--seed-wholesome);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-add:hover {
+      background: rgba(52, 211, 153, 0.2);
+      border-color: rgba(52, 211, 153, 0.5);
+    }
+
+    /* ========== 关键词提示 ========== */
+    .keywords-hint {
+      background: var(--bg-secondary);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+    }
+
+    .keywords-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .kw-item {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      padding: 4px 0;
+    }
+    .kw-item .kw-trigger {
+      color: var(--accent-blue);
+      font-weight: 500;
+    }
+    .kw-item .kw-arrow { color: var(--text-muted); margin: 0 4px; }
+    .kw-item .kw-seed { color: var(--text-secondary); }
+
+    /* ========== 空状态 ========== */
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .empty-state .empty-icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    /* ========== Toast 通知 ========== */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      background: var(--bg-card);
+      border: 1px solid rgba(251,191,36,0.3);
+      border-radius: var(--radius-sm);
+      padding: 12px 20px;
+      font-size: 0.82rem;
+      color: var(--crystal-gold);
+      font-weight: 600;
+      font-family: inherit;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      animation: toastIn 0.4s ease, toastOut 0.4s ease 2.6s forwards;
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateX(0); }
+      to   { opacity: 0; transform: translateX(40px); }
+    }
+
+    /* ========== 响应式 ========== */
+    @media (max-width: 640px) {
+      .app { padding: 16px 12px 60px; }
+      .header h1 { font-size: 1.4rem; }
+      .seed-grid { grid-template-columns: 1fr; }
+      .input-row { flex-direction: column; }
+      .add-seed-form { flex-direction: column; }
+      .stats-bar { gap: 8px; }
+      .stat-chip { padding: 6px 12px; font-size: 0.72rem; }
+      .keywords-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ========== 滚动条 ========== */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.3); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(139,92,246,0.5); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- 头部标题 -->
+    <header class="header">
+      <h1>唯识种子库</h1>
+      <div class="subtitle">Vasana Seed Store &middot; Yogaacaara PoC</div>
+    </header>
+
+    <!-- 统计栏 -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-chip">
+        <span class="stat-icon">&#x1F504;</span>
+        <span class="stat-label">总互动</span>
+        <span class="stat-value" id="statInteractions">0</span>
+      </div>
+      <div class="stat-chip">
+        <span class="stat-icon">&#x1F331;</span>
+        <span class="stat-label">种子</span>
+        <span class="stat-value" id="statTotalSeeds">0</span>
+      </div>
+      <div class="stat-chip">
+        <span class="stat-icon">&#x26A1;</span>
+        <span class="stat-label">活跃</span>
+        <span class="stat-value" id="statActiveSeeds">0</span>
+      </div>
+      <div class="stat-chip">
+        <span class="stat-icon">&#x1F48E;</span>
+        <span class="stat-label">已结晶</span>
+        <span class="stat-value" id="statCrystallized">0</span>
+      </div>
+      <button class="btn-reset" id="btnReset" title="重置所有数据">&#x21BB; 重置</button>
+    </div>
+
+    <!-- 阈值调节 -->
+    <div class="threshold-bar">
+      <label>结晶阈值 (熏习次数):</label>
+      <input type="range" class="threshold-slider" id="thresholdSlider" min="2" max="15" value="5">
+      <span class="threshold-value" id="thresholdValue">5</span>
+    </div>
+
+    <!-- 互动触发区 -->
+    <div class="interaction-zone">
+      <div class="section-title">&#x1F4AC; 对话触发区 &mdash; 输入一句话，观察种子变化</div>
+      <div class="input-row">
+        <input type="text" class="dialog-input" id="dialogInput"
+               placeholder="试试输入：我试试看、我不行、我学到了、谢谢 ..."
+               autocomplete="off">
+        <button class="btn-trigger" id="btnTrigger">触发 &#x2728;</button>
+      </div>
+      <div class="trigger-result" id="triggerResult"></div>
+    </div>
+
+    <!-- 种子库网格 -->
+    <div class="section-title">&#x1F330; 种子库 &mdash; 阿赖耶识中的一切种子</div>
+    <div class="seed-grid" id="seedGrid"></div>
+
+    <!-- 添加种子 -->
+    <div class="add-seed-zone">
+      <div class="section-title">&#x2795; 添加新种子</div>
+      <div class="add-seed-form">
+        <input type="text" class="dialog-input" id="newSeedName"
+               placeholder="种子名称（如：自我怀疑）" autocomplete="off">
+        <select class="type-select" id="newSeedType">
+          <option value="unwholesome">不善</option>
+          <option value="wholesome">善</option>
+          <option value="neutral">无记</option>
+        </select>
+        <input type="text" class="dialog-input" id="newSeedKeywords"
+               placeholder="触发关键词（逗号分隔，可选）" autocomplete="off" style="min-width:200px;">
+        <button class="btn-add" id="btnAddSeed">添加</button>
+      </div>
+    </div>
+
+    <!-- 关键词提示 -->
+    <div class="keywords-hint">
+      <div class="section-title">&#x1F511; 预设关键词映射</div>
+      <div class="keywords-grid" id="keywordsGrid"></div>
+    </div>
+  </div>
+
+  <!-- Toast 容器 -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    /* ==========================================================
+     *  唯识种子库 (Vasana Seed Store) — PoC
+     *  灵感: SecurityRonin/alaya perfuming.rs
+     *  核心机制: 种子 → 现行 → 熏习 → 结晶
+     * ========================================================== */
+
+    // ========== 常量 ==========
+    const STORAGE_KEY = 'vasana-seed-store-v1';
+    const DEFAULT_THRESHOLD = 5; // 对应 perfuming.rs 的 CRYSTALLIZATION_THRESHOLD
+
+    // ========== 预设种子与关键词库 ==========
+    const DEFAULT_SEEDS = [
+      { id: 's1',  name: '自我怀疑',   type: 'unwholesome', keywords: ['我不行','做不到','没用','差劲','不够好'], count: 0 },
+      { id: 's2',  name: '好奇心',     type: 'wholesome',   keywords: ['我想知道','试试看','有意思','为什么','好奇'], count: 0 },
+      { id: 's3',  name: '恐惧失败',   type: 'unwholesome', keywords: ['我害怕','不敢','万一失败','风险太大','不敢试'], count: 0 },
+      { id: 's4',  name: '成长心态',   type: 'wholesome',   keywords: ['我学到了','成长','进步','又可以了','收获'], count: 0 },
+      { id: 's5',  name: '感恩',       type: 'wholesome',   keywords: ['谢谢','感恩','感激','幸运','知足'], count: 0 },
+      { id: 's6',  name: '焦虑',       type: 'unwholesome', keywords: ['焦虑','担心','紧张','怎么办','来不及'], count: 0 },
+      { id: 's7',  name: '自我慈悲',   type: 'wholesome',   keywords: ['接纳自己','没关系','慢慢来','允许','温柔'], count: 0 },
+      { id: 's8',  name: '比较心',     type: 'unwholesome', keywords: ['比别人差','不如人','别人都行','比不上','落后'], count: 0 },
+      { id: 's9',  name: '专注力',     type: 'wholesome',   keywords: ['专注','集中','心流','沉浸','投入'], count: 0 },
+      { id: 's10', name: '逃避',       type: 'unwholesome', keywords: ['不想面对','算了','放弃','无所谓','逃避'], count: 0 },
+      { id: 's11', name: '勇气',       type: 'wholesome',   keywords: ['我愿意','勇敢','挑战','不怕','试一试'], count: 0 },
+      { id: 's12', name: '执着',       type: 'neutral',     keywords: ['一定要','必须','非要','不能变','坚持不变'], count: 0 },
+      { id: 's13', name: '平常心',     type: 'neutral',     keywords: ['随缘','都可以','还好','顺其自然','平静'], count: 0 },
+      { id: 's14', name: '愤怒',       type: 'unwholesome', keywords: ['不公平','气死了','凭什么','讨厌','愤怒'], count: 0 },
+      { id: 's15', name: '喜悦',       type: 'wholesome',   keywords: ['开心','太好了','太棒了','幸福','快乐'], count: 0 },
+    ];
+
+    // ========== 状态管理 ==========
+    let state = {
+      seeds: [],
+      threshold: DEFAULT_THRESHOLD,
+      totalInteractions: 0,
+    };
+
+    // ========== 持久化 ==========
+
+    /** 从 localStorage 加载种子库 */
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          state.seeds = parsed.seeds || [];
+          state.threshold = parsed.threshold || DEFAULT_THRESHOLD;
+          state.totalInteractions = parsed.totalInteractions || 0;
+        } else {
+          // 首次访问 — 使用默认种子
+          state.seeds = JSON.parse(JSON.stringify(DEFAULT_SEEDS));
+          state.threshold = DEFAULT_THRESHOLD;
+          state.totalInteractions = 0;
+        }
+      } catch (e) {
+        console.warn('加载种子库失败，使用默认数据', e);
+        state.seeds = JSON.parse(JSON.stringify(DEFAULT_SEEDS));
+      }
+    }
+
+    /** 保存种子库到 localStorage */
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn('保存种子库失败', e);
+      }
+    }
+
+    // ========== 工具函数 ==========
+
+    /** 生成唯一 ID */
+    function genId() {
+      return 'seed_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+    }
+
+    /** 计算种子强度百分比 (基于阈值，封顶 100%) */
+    function calcStrength(count, threshold) {
+      // 用 tanh 曲线模拟，让接近阈值时有"冲刺感"
+      const ratio = count / threshold;
+      return Math.min(100, Math.round(Math.tanh(ratio) * 100));
+    }
+
+    /** 获取种子状态标签 */
+    function getSeedStatus(seed, threshold) {
+      if (seed.count >= threshold) return 'crystallized';
+      if (seed.count > 0) return 'active';
+      return 'dormant';
+    }
+
+    /** 状态文本映射 */
+    const STATUS_TEXT = {
+      dormant: '潜伏',
+      active: '活跃',
+      crystallized: '已结晶',
+    };
+
+    const TYPE_TEXT = {
+      wholesome: '善',
+      unwholesome: '不善',
+      neutral: '无记',
+    };
+
+    // ========== 渲染 ==========
+
+    /** 渲染种子网格 */
+    function renderSeedGrid() {
+      const grid = document.getElementById('seedGrid');
+
+      if (state.seeds.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1;">
+            <div class="empty-icon">&#x1F330;</div>
+            <div>种子库为空 — 添加你的第一个种子</div>
+          </div>`;
+        return;
+      }
+
+      // 按活跃度排序: 已结晶 > 活跃 > 潜伏
+      const sorted = [...state.seeds].sort((a, b) => {
+        const sa = getSeedStatus(a, state.threshold);
+        const sb = getSeedStatus(b, state.threshold);
+        const order = { crystallized: 0, active: 1, dormant: 2 };
+        return (order[sa] - order[sb]) || (b.count - a.count);
+      });
+
+      grid.innerHTML = sorted.map(seed => {
+        const status = getSeedStatus(seed, state.threshold);
+        const strength = calcStrength(seed.count, state.threshold);
+        const isCrystallized = status === 'crystallized';
+
+        return `
+          <div class="seed-card ${isCrystallized ? 'crystallized' : ''}"
+               data-id="${seed.id}" data-type="${seed.type}">
+            <button class="seed-delete" onclick="deleteSeed('${seed.id}')" title="删除种子">&times;</button>
+            <div class="seed-header">
+              <span class="seed-name">${isCrystallized ? '&#x1F48E; ' : ''}${escHtml(seed.name)}</span>
+              <span class="seed-type-tag">${TYPE_TEXT[seed.type] || '无记'}</span>
+            </div>
+            <div class="seed-status-row">
+              <span class="seed-status ${status === 'dormant' ? 'dormant' : status === 'active' ? 'active-s' : 'crystal'}">
+                ${STATUS_TEXT[status]}
+              </span>
+              <span class="seed-count">熏习 <span>${seed.count}</span> 次</span>
+            </div>
+            <div class="strength-bar-track">
+              <div class="strength-bar-fill" style="width:${strength}%"></div>
+            </div>
+            <div class="seed-strength-label">${strength}%</div>
+          </div>`;
+      }).join('');
+    }
+
+    /** 更新统计栏 */
+    function renderStats() {
+      const activeCount = state.seeds.filter(s => s.count > 0 && s.count < state.threshold).length;
+      const crystalCount = state.seeds.filter(s => s.count >= state.threshold).length;
+
+      document.getElementById('statInteractions').textContent = state.totalInteractions;
+      document.getElementById('statTotalSeeds').textContent = state.seeds.length;
+      document.getElementById('statActiveSeeds').textContent = activeCount;
+      document.getElementById('statCrystallized').textContent = crystalCount;
+    }
+
+    /** 渲染关键词提示 */
+    function renderKeywords() {
+      const grid = document.getElementById('keywordsGrid');
+      const items = [];
+
+      state.seeds.forEach(seed => {
+        (seed.keywords || []).forEach(kw => {
+          items.push(`<div class="kw-item">
+            <span class="kw-trigger">"${escHtml(kw)}"</span>
+            <span class="kw-arrow">&rarr;</span>
+            <span class="kw-seed">${escHtml(seed.name)}</span>
+          </div>`);
+        });
+      });
+
+      grid.innerHTML = items.join('') || '<div class="kw-item">暂无关键词映射</div>';
+    }
+
+    /** 全量渲染 */
+    function renderAll() {
+      renderSeedGrid();
+      renderStats();
+      renderKeywords();
+    }
+
+    // ========== 核心交互逻辑 ==========
+
+    /**
+     * 关键词匹配 — 找出文本中激活的种子
+     * 返回匹配的种子数组 (去重，最多3个)
+     */
+    function matchSeeds(text) {
+      const lower = text.toLowerCase();
+      const matched = [];
+      const seen = new Set();
+
+      for (const seed of state.seeds) {
+        if (seen.has(seed.id)) continue;
+        for (const kw of (seed.keywords || [])) {
+          if (lower.includes(kw.toLowerCase())) {
+            matched.push(seed);
+            seen.add(seed.id);
+            break; // 每个种子只匹配一次
+          }
+        }
+        if (matched.length >= 3) break; // 最多激活3个
+      }
+
+      return matched;
+    }
+
+    /**
+     * 触发互动 — 核心流程:
+     * 1. 匹配关键词 → 找到被激活的种子
+     * 2. 熏习: count += 1
+     * 3. 检查是否结晶
+     * 4. 更新 UI + 动画
+     */
+    function triggerInteraction() {
+      const input = document.getElementById('dialogInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      state.totalInteractions++;
+      const matched = matchSeeds(text);
+      const resultDiv = document.getElementById('triggerResult');
+
+      if (matched.length === 0) {
+        resultDiv.innerHTML = `<span style="color:var(--text-muted);">
+          这句话暂未触发任何种子 — 试试其他表达，或添加新的关键词映射。
+        </span>`;
+        input.value = '';
+        saveState();
+        renderAll();
+        return;
+      }
+
+      // 熏习: 每个匹配的种子 count += 1
+      const crystallizedNow = [];
+
+      matched.forEach(seed => {
+        const wasCrystallized = seed.count >= state.threshold;
+        seed.count += 1;
+        // 检查是否刚刚达到结晶
+        if (!wasCrystallized && seed.count >= state.threshold) {
+          crystallizedNow.push(seed);
+        }
+      });
+
+      // 构建结果文本
+      let html = '<span style="color:var(--text-muted);">「' + escHtml(text) + '」</span> 激活了: ';
+      html += matched.map(s =>
+        `<span class="activated-seed-name ${s.type}">${escHtml(s.name)}</span>`
+      ).join(' ');
+
+      if (crystallizedNow.length > 0) {
+        html += '<br><span class="crystal-alert">&#x1F48E; 结晶! ' +
+          crystallizedNow.map(s => `「${escHtml(s.name)}」`).join(', ') +
+          ' 已结晶为稳定特质!</span>';
+      }
+
+      resultDiv.innerHTML = html;
+
+      // 保存 + 渲染
+      saveState();
+      renderAll();
+
+      // 动画: 给被激活的种子卡片添加发光效果
+      requestAnimationFrame(() => {
+        matched.forEach(seed => {
+          const card = document.querySelector(`.seed-card[data-id="${seed.id}"]`);
+          if (card) {
+            card.classList.add('active');
+            setTimeout(() => card.classList.remove('active'), 1800);
+          }
+        });
+
+        // 结晶动画
+        crystallizedNow.forEach(seed => {
+          const card = document.querySelector(`.seed-card[data-id="${seed.id}"]`);
+          if (card) {
+            card.classList.add('crystallizing');
+            setTimeout(() => card.classList.remove('crystallizing'), 1400);
+          }
+          showToast(`&#x1F48E; 「${seed.name}」结晶为稳定特质!`);
+        });
+      });
+
+      input.value = '';
+      input.focus();
+    }
+
+    /** 添加新种子 */
+    function addSeed() {
+      const nameInput = document.getElementById('newSeedName');
+      const typeSelect = document.getElementById('newSeedType');
+      const kwInput = document.getElementById('newSeedKeywords');
+
+      const name = nameInput.value.trim();
+      if (!name) {
+        nameInput.focus();
+        return;
+      }
+
+      // 检查重名
+      if (state.seeds.some(s => s.name === name)) {
+        showToast(`种子「${name}」已存在`);
+        return;
+      }
+
+      const keywordsRaw = kwInput.value.trim();
+      const keywords = keywordsRaw
+        ? keywordsRaw.split(/[,，、]/).map(k => k.trim()).filter(Boolean)
+        : [];
+
+      const seed = {
+        id: genId(),
+        name,
+        type: typeSelect.value,
+        keywords,
+        count: 0,
+      };
+
+      state.seeds.push(seed);
+      saveState();
+      renderAll();
+
+      nameInput.value = '';
+      kwInput.value = '';
+      nameInput.focus();
+    }
+
+    /** 删除种子 */
+    function deleteSeed(id) {
+      const idx = state.seeds.findIndex(s => s.id === id);
+      if (idx === -1) return;
+      const name = state.seeds[idx].name;
+      if (!confirm(`确定要删除种子「${name}」吗？`)) return;
+      state.seeds.splice(idx, 1);
+      saveState();
+      renderAll();
+    }
+
+    /** 重置所有数据 */
+    function resetAll() {
+      if (!confirm('确定要重置整个种子库吗？所有数据将丢失。')) return;
+      state.seeds = JSON.parse(JSON.stringify(DEFAULT_SEEDS));
+      state.threshold = DEFAULT_THRESHOLD;
+      state.totalInteractions = 0;
+      document.getElementById('thresholdSlider').value = DEFAULT_THRESHOLD;
+      document.getElementById('thresholdValue').textContent = DEFAULT_THRESHOLD;
+      document.getElementById('triggerResult').innerHTML = '';
+      saveState();
+      renderAll();
+    }
+
+    /** Toast 通知 */
+    function showToast(html) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = html;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3200);
+    }
+
+    /** HTML 转义 */
+    function escHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // ========== 事件绑定 ==========
+
+    document.getElementById('btnTrigger').addEventListener('click', triggerInteraction);
+
+    document.getElementById('dialogInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') triggerInteraction();
+    });
+
+    document.getElementById('btnAddSeed').addEventListener('click', addSeed);
+
+    document.getElementById('newSeedName').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addSeed();
+    });
+
+    document.getElementById('btnReset').addEventListener('click', resetAll);
+
+    // 阈值滑块
+    document.getElementById('thresholdSlider').addEventListener('input', (e) => {
+      const val = parseInt(e.target.value);
+      state.threshold = val;
+      document.getElementById('thresholdValue').textContent = val;
+      saveState();
+      renderAll();
+    });
+
+    // ========== 启动 ==========
+    loadState();
+    document.getElementById('thresholdSlider').value = state.threshold;
+    document.getElementById('thresholdValue').textContent = state.threshold;
+    renderAll();
+  </script>
+</body>
+</html>

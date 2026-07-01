@@ -17,7 +17,10 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install requests beautifulsoup4
+        run: pip install requests beautifulsoup4 pytest
+
+      - name: Run tests
+        run: pytest tests/ -v --tb=short
 
       - name: Run scraper
         run: python scripts/scrape.py
@@ -35,3 +38,12 @@ jobs:
             git commit -m "chore: update trending repos data"
             git push
           fi
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "## ❌ Monthly scrape failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Triggered by: ${{ github.event_name }} (${{ github.actor }})" >> $GITHUB_STEP_SUMMARY
+          exit 1

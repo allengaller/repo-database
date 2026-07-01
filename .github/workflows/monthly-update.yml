@@ -28,7 +28,10 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests pytest
+
+      - name: Run tests
+        run: pytest tests/ -v --tb=short
 
       - name: Determine target month
         id: target
@@ -74,3 +77,14 @@ jobs:
             git commit -m "chore: update monthly repos for ${{ steps.target.outputs.tag }}"
             git push
           fi
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "## ❌ Monthly update failed for ${{ steps.target.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Triggered by: ${{ github.event_name }} (${{ github.actor }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the logs at the link above." >> $GITHUB_STEP_SUMMARY
+          exit 1

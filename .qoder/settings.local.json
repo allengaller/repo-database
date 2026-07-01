@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat requirements.txt FEATURE_PLAN.md REVIEW.md FIX_REPORT.md | head -200)",
+      "Bash(wc -l scripts/*.py web/*.js web/*.html web/*.css && python3 -c \"import json; d=json.load\\(open\\('data/repos.json'\\)\\); print\\('repo count:', len\\(d\\) if isinstance\\(d,list\\) else 'n/a', 'type:', type\\(d\\).__name__\\)\")"
+    ]
+  }
+}
