@@ -1,0 +1,8 @@
+schema_version: 1
+module_path: mind_coach_research
+title: 心力教练项目 · 三轮研究档案与可交付物
+scope:
+    - research/mind-coach/
+source_files: []
+depends_on: []
+related_to: []

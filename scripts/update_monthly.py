@@ -19,9 +19,8 @@ from datetime import datetime, timedelta
 try:
     import requests
 except ImportError:
-    import subprocess
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "requests"])
-    import requests
+    print("Error: 'requests' package is required. Install with: pip install -r requirements.txt")
+    sys.exit(1)
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 DATA_FILE = "data/repos.json"
@@ -153,14 +152,20 @@ def format_repo(r, month_tag):
 
 
 def calculate_score(repo):
+    """Calculate treasure score (aligned with scrape.py).
+
+    score = stars + forks + (forks/stars)*1000 + today_stars*10 + commit_activity*2
+    """
     stars = repo.get("stars", 0)
     forks = repo.get("forks", 0)
+    today = repo.get("today_stars", 0)
+    commits = repo.get("commit_activity", 0)
     ratio = forks / stars if stars > 0 else 0
-    return round(stars + forks + ratio * 1000, 2)
+    return round(stars + forks + ratio * 1000 + today * 10 + commits * 2, 2)
 
 
 def merge_with_existing(new_repos):
-    """Merge new repos into data/repos.json"""
+    """Merge new repos into data/repos.json with field-wise max (like scrape.py)."""
     try:
         with open(DATA_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -179,9 +184,29 @@ def merge_with_existing(new_repos):
         repo["score"] = calculate_score(repo)
         if name not in existing:
             new_count += 1
-        elif repo["score"] > existing[name].get("score", 0):
+            existing[name] = repo
+        else:
+            # Field-wise merge: take max of numeric signals, prefer richer data
+            ex = existing[name]
+            ex["stars"] = max(ex.get("stars", 0), repo.get("stars", 0))
+            ex["forks"] = max(ex.get("forks", 0), repo.get("forks", 0))
+            ex["today_stars"] = max(ex.get("today_stars", 0), repo.get("today_stars", 0))
+            ex["commit_activity"] = max(ex.get("commit_activity", 0), repo.get("commit_activity", 0))
+            if ex.get("language") in (None, "Unknown") and repo.get("language") not in (None, "Unknown"):
+                ex["language"] = repo["language"]
+            if (not ex.get("description") or ex["description"] == "暂无描述") and repo.get("description"):
+                ex["description"] = repo["description"]
+            # Preserve month_tag if new repo has one
+            if repo.get("month_tag") and not ex.get("month_tag"):
+                ex["month_tag"] = repo["month_tag"]
+            old_src = ex.get("source", "") or ""
+            new_src = repo.get("source", "") or ""
+            merged_sources = sorted({s for s in old_src.split("+") + new_src.split("+") if s})
+            ex["source"] = "+".join(merged_sources)
+            if repo.get("fetched_at", "") > ex.get("fetched_at", ""):
+                ex["fetched_at"] = repo["fetched_at"]
+            ex["score"] = calculate_score(ex)
             updated += 1
-        existing[name] = repo
 
     result = sorted(existing.values(), key=lambda x: x["score"], reverse=True)
 
@@ -189,6 +214,7 @@ def merge_with_existing(new_repos):
         sources.append("monthly_new")
 
     output = {
+        "schema_version": 2,
         "fetched_at": datetime.now().isoformat(),
         "total": len(result),
         "sources": sources,
@@ -298,9 +324,10 @@ def generate_report(merged, month_tag, year, month, new_count, updated):
 
 
 def main():
+    now = datetime.now()
     parser = argparse.ArgumentParser(description="Fetch new GitHub repos for a specific month")
-    parser.add_argument("--year", type=int, default=2026, help="Year (default: 2026)")
-    parser.add_argument("--month", type=int, default=5, help="Month 1-12 (default: 5)")
+    parser.add_argument("--year", type=int, default=now.year, help=f"Year (default: {now.year})")
+    parser.add_argument("--month", type=int, default=now.month, help=f"Month 1-12 (default: {now.month})")
     parser.add_argument("--report", action="store_true", help="Generate Markdown report")
     args = parser.parse_args()
 

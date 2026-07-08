@@ -1,0 +1,2 @@
+# Large data files — mark as binary to avoid noisy diffs
+data/repos.json -diff -merge

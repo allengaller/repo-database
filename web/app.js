@@ -124,6 +124,43 @@ const I18N = {
     scoreLabel: 'Score ≥',
     resetBtn: 'Reset',
     myBookmarks: 'Bookmarks',
+    exportBtn: 'Export',
+    repoCount: 'repos',
+    totalStars: 'Total Stars',
+    langCount: 'languages',
+    lastUpdated: 'Updated',
+    noResults: 'No matching projects',
+    noBookmarks: 'No bookmarks yet',
+    loadError: 'Failed to load data',
+    fileProtocolTip: 'Currently opening via file://. Please serve via local server:',
+    runScraperTip: 'Run first in project root',
+    openInGithub: 'View on GitHub',
+    copyUrl: 'Copy URL',
+    copied: 'Copied!',
+    dataSource: 'Source:',
+    footerText: 'Score: Stars + Fork Rate + Growth',
+    title: 'GitHub',
+    titleMuted: 'Treasure',
+    subtitle: 'Discover quality 2026 projects · Smart filtering',
+    bookmarkEmpty: 'No bookmarks yet',
+    topLanguages: 'Top Languages',
+    scoreUnit: 'Score',
+    forkRatio: 'Fork Rate',
+    compareTitle: 'Compare Projects',
+    compareSelect: 'Selected',
+    compareBtn: 'Compare',
+    compareClear: 'Clear',
+    compareVs: 'VS',
+    discoverTreasure: 'Discover',
+    smartRecommend: 'Recommend',
+    savePreset: 'Save Preset',
+    cloneCommand: 'Clone Command',
+    recommendTitle: 'Smart Recommendations',
+    license: 'License',
+    licenseFull: 'Open Source License',
+    keyboardHelp: 'Keyboard Shortcuts',
+    pressKey: 'Press',
+    searchPreview: 'Search Preview',
     active: 'Active',
     veryActive: 'Very Active',
     stale: 'Stale',
@@ -146,46 +183,6 @@ const I18N = {
     inspirationAutoPlay: 'Auto-play',
     inspirationPause: 'Pause',
     inspirationKeyboardHelp: 'Keyboard Shortcuts'
-  },
-  zh: {
-    searchPlaceholder: '搜索项目名称或描述...',
-    exportBtn: 'Export',
-    repoCount: 'repos',
-    totalStars: 'Total Stars',
-    langCount: 'languages',
-    lastUpdated: 'Updated',
-    noResults: 'No matching projects',
-    noBookmarks: 'No bookmarks yet',
-    loadError: 'Failed to load data',
-    fileProtocolTip: 'Currently opening via file://. Please serve via local server:',
-    runScraperTip: 'Run first in project root',
-    license: 'License',
-    licenseFull: 'Open Source License',
-    keyboardHelp: 'Keyboard Shortcuts',
-    pressKey: 'Press',
-    searchPreview: 'Search Preview',
-    openInGithub: 'View on GitHub',
-    copyUrl: 'Copy URL',
-    copied: 'Copied!',
-    dataSource: 'Source:',
-    footerText: 'Score: Stars + Fork Rate + Growth',
-    title: 'GitHub',
-    titleMuted: 'Treasure',
-    subtitle: 'Discover quality 2026 projects · Smart filtering',
-    bookmarkEmpty: 'No bookmarks yet',
-    topLanguages: 'Top Languages',
-    scoreUnit: 'Score',
-    forkRatio: 'Fork Rate',
-    compareTitle: 'Compare Projects',
-    compareSelect: 'Selected',
-    compareBtn: 'Compare',
-    compareClear: 'Clear',
-    compareVs: 'VS',
-    discoverTreasure: 'Discover',
-    smartRecommend: 'Recommend',
-    savePreset: 'Save Preset',
-    cloneCommand: 'Clone Command',
-    recommendTitle: 'Smart Recommendations'
   }
 };
 
@@ -401,14 +398,17 @@ function closeModal() {
   currentModalRepo = null;
 }
 
-async function loadRepos() {
+async function loadRepos(retryCount = 0) {
   const grid = document.getElementById('repoGrid');
   isLoading = true;
   renderSkeleton();
 
+  const DATA_URLS = [DATA_URL, './data/repos.json', 'data/repos.json'];
+  const MAX_RETRIES = 2;
+
   try {
     let response;
-    for (const url of [DATA_URL, './data/repos.json', 'data/repos.json']) {
+    for (const url of DATA_URLS) {
       try {
         response = await fetch(url);
         if (response.ok) break;
@@ -426,6 +426,13 @@ async function loadRepos() {
     filterAndSort();
 
   } catch (error) {
+    // Retry with backoff
+    if (retryCount < MAX_RETRIES) {
+      const delay = (retryCount + 1) * 2000;
+      setTimeout(() => loadRepos(retryCount + 1), delay);
+      return;
+    }
+
     isLoading = false;
     const isFileProtocol = window.location.protocol === 'file:';
     grid.innerHTML = `
@@ -437,6 +444,9 @@ async function loadRepos() {
             : `${t('runScraperTip')}<br><code style="background: var(--bg-soft); padding: 2px 6px; border-radius: 4px;">python3 scripts/scrape.py</code>`
           }
         </span>
+        <button onclick="loadRepos(0)" style="margin-top: 8px; padding: 8px 20px; background: var(--text); color: var(--bg); border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: var(--font-sans);">
+          ${currentLang === 'zh' ? '重试' : 'Retry'}
+        </button>
       </div>
     `;
   }

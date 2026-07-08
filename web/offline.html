@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0c0c0e">
+  <title>GitHub Treasure — Offline</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0c0c0e;
+      color: #ededef;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 32px;
+    }
+    .container { max-width: 420px; }
+    .icon {
+      width: 64px; height: 64px;
+      margin: 0 auto 24px;
+      border-radius: 16px;
+      background: #18181c;
+      border: 1px solid #26262c;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .icon svg { width: 32px; height: 32px; color: #606068; }
+    h1 { font-size: 1.25rem; margin-bottom: 8px; font-weight: 600; }
+    p { font-size: 0.9rem; color: #a0a0a8; line-height: 1.6; margin-bottom: 24px; }
+    .retry-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 24px;
+      background: #ededef; color: #0c0c0e;
+      border: none; border-radius: 10px;
+      font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: opacity 0.15s;
+      font-family: inherit;
+    }
+    .retry-btn:hover { opacity: 0.85; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="1" y1="1" x2="23" y2="23"/>
+        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+        <path d="M10.71 5.05A16 16 0 0 1 22.56 9"/>
+        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+        <line x1="12" y1="20" x2="12.01" y2="20"/>
+      </svg>
+    </div>
+    <h1>当前处于离线状态</h1>
+    <p>无法连接到服务器。请检查网络连接后重试。<br>如果之前访问过，数据可能已缓存在本地。</p>
+    <button class="retry-btn" onclick="location.reload()">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+        <path d="M3 3v5h5"/>
+      </svg>
+      重试
+    </button>
+  </div>
+</body>
+</html>

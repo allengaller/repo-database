@@ -13,11 +13,11 @@ from datetime import datetime, timedelta
 
 try:
     import requests
+    from requests.adapters import HTTPAdapter
+    from urllib3.util.retry import Retry
 except ImportError:
-    import subprocess
-
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "requests"])
-    import requests
+    print("Error: 'requests' package is required. Install with: pip install -r requirements.txt")
+    sys.exit(1)
 
 # Configuration
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
@@ -111,6 +111,25 @@ def get_headers():
     return headers
 
 
+def get_session():
+    """Create a requests session with retry + exponential backoff.
+
+    Retries up to 3 times on 429/500/502/503/504 with backoff
+    factor 1.0 (1s, 2s, 4s between retries).
+    """
+    session = requests.Session()
+    retry = Retry(
+        total=3,
+        backoff_factor=1.0,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=["GET"],
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+    return session
+
+
 def fetch_commit_activity(owner, repo):
     """Return the number of commits in the last 4 weeks (free, no token).
 
@@ -119,7 +138,7 @@ def fetch_commit_activity(owner, repo):
     """
     url = f"https://api.github.com/repos/{owner}/{repo}/stats/commit_activity"
     try:
-        resp = requests.get(url, headers=get_headers(), timeout=10)
+        resp = get_session().get(url, headers=get_headers(), timeout=10)
         if resp.status_code != 200 or not isinstance(resp.json(), list):
             return 0
         return sum(w.get("total", 0) for w in resp.json()[-4:])
@@ -155,7 +174,7 @@ def fetch_github_repo_details(owner, repo):
     url = f"https://api.github.com/repos/{owner}/{repo}"
 
     try:
-        resp = requests.get(url, headers=get_headers(), timeout=10)
+        resp = get_session().get(url, headers=get_headers(), timeout=10)
         if resp.status_code == 404:
             return None
         if resp.status_code == 403:
@@ -182,7 +201,7 @@ def fetch_awesome_lists():
 
         try:
             # Fetch README raw content
-            resp = requests.get(
+            resp = get_session().get(
                 list_info["url"], headers={"User-Agent": "Mozilla/5.0"}, timeout=15
             )
 
@@ -224,15 +243,16 @@ def fetch_awesome_lists():
 def search_github_repos(query, min_stars=1000, per_page=30):
     """Search GitHub repos using API"""
     url = "https://api.github.com/search/repositories"
+    current_year = datetime.now().year
     params = {
-        "q": f"{query} created:2026-01-01..2026-12-31 stars:>={min_stars}",
+        "q": f"{query} created:{current_year}-01-01..{current_year}-12-31 stars:>={min_stars}",
         "sort": "stars",
         "order": "desc",
         "per_page": per_page,
     }
 
     try:
-        resp = requests.get(url, params=params, headers=get_headers(), timeout=30)
+        resp = get_session().get(url, params=params, headers=get_headers(), timeout=30)
         if resp.status_code == 403:
             msg = resp.json().get("message", "")
             print(f"    Rate limited: {msg}")
@@ -390,7 +410,7 @@ def fetch_hackernews():
 
     try:
         # Get top stories
-        resp = requests.get(
+        resp = get_session().get(
             "https://hacker-news.firebaseio.com/v0/topstories.json", timeout=10
         )
         if resp.status_code != 200:
@@ -401,7 +421,7 @@ def fetch_hackernews():
 
         for story_id in story_ids:
             try:
-                story_resp = requests.get(
+                story_resp = get_session().get(
                     f"https://hacker-news.firebaseio.com/v0/item/{story_id}.json",
                     timeout=10,
                 )
@@ -449,7 +469,7 @@ def fetch_devto_articles():
 
     try:
         # Get top articles
-        resp = requests.get(
+        resp = get_session().get(
             "https://dev.to/api/articles",
             params={"per_page": 50, "top": 7},
             headers={"User-Agent": "Mozilla/5.0"},
@@ -607,6 +627,7 @@ def save_results(repos):
     print(f"\n[6/6] Saving results...")
 
     output = {
+        "schema_version": 2,
         "fetched_at": datetime.now().isoformat(),
         "total": len(repos),
         "sources": ["awesome_lists", "github_api", "trending", "hackernews", "devto"],

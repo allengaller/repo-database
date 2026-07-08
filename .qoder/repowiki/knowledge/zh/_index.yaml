@@ -1,0 +1,52 @@
+# 知识卡导出索引文件
+schema_version: 1
+locale: zh-CN
+branch: main
+nodes_managed: true
+exported_at: "2026-07-07T16:54:00Z"
+modules:
+    "":
+        dir_name: RepoHoarder · GitHub 宝藏仓库聚合与展示
+        title: RepoHoarder · GitHub 宝藏仓库聚合与展示
+        scope:
+            - README.md
+            - README.zh-CN.md
+            - requirements.txt
+            - .gitignore
+        source_files: []
+        children:
+            - data_pipeline
+            - mind_coach_research
+            - web_app
+        depends_on: []
+        related_to: []
+    data_pipeline:
+        dir_name: GitHub 宝藏仓库数据抓取与月度更新流水线
+        title: GitHub 宝藏仓库数据抓取与月度更新流水线
+        scope:
+            - scripts/
+            - data/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: web_app
+    mind_coach_research:
+        dir_name: 心力教练项目 · 三轮研究档案与可交付物
+        title: 心力教练项目 · 三轮研究档案与可交付物
+        scope:
+            - research/mind-coach/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    web_app:
+        dir_name: GitHub 宝藏仓库前端展示应用
+        title: GitHub 宝藏仓库前端展示应用
+        scope:
+            - web/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: data_pipeline

@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
+import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
@@ -230,9 +231,16 @@ def test_format_api_repo_schema():
 # ---------- update_monthly.calculate_score ----------------------------------
 
 def test_update_monthly_calculate_score():
-    repo = {"stars": 500, "forks": 50}
+    repo = {"stars": 500, "forks": 50, "today_stars": 0, "commit_activity": 0}
     # 500 + 50 + (50/500)*1000 = 650
     assert update_monthly.calculate_score(repo) == 650.0
+
+
+def test_update_monthly_calculate_score_with_momentum():
+    """Ensure update_monthly.calculate_score matches scrape.py formula."""
+    repo = {"stars": 1000, "forks": 100, "today_stars": 50, "commit_activity": 30}
+    # 1000 + 100 + 100 + 500 + 60 = 1760 (same as scrape.calculate_score)
+    assert update_monthly.calculate_score(repo) == 1760.0
 
 
 # ---------- headers ---------------------------------------------------------
@@ -247,3 +255,13 @@ def test_get_headers_without_token(monkeypatch):
 def test_get_headers_with_token(monkeypatch):
     monkeypatch.setattr(scrape, "GITHUB_TOKEN", "ghp_xxx")
     assert scrape.get_headers()["Authorization"] == "Bearer ghp_xxx"
+
+
+# ---------- get_session -----------------------------------------------------
+
+def test_get_session_returns_session():
+    session = scrape.get_session()
+    assert isinstance(session, requests.Session)
+    # Verify retry adapter is mounted for https
+    adapter = session.get_adapter("https://api.github.com")
+    assert adapter.max_retries.total == 3

@@ -1,0 +1,11 @@
+schema_version: 1
+module_path: ""
+title: RepoHoarder · GitHub 宝藏仓库聚合与展示
+scope:
+    - README.md
+    - README.zh-CN.md
+    - requirements.txt
+    - .gitignore
+source_files: []
+depends_on: []
+related_to: []
