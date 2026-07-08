@@ -9,6 +9,14 @@
 - [web/offline.html](file://web/offline.html)
 </cite>
 
+## 更新摘要
+**所做更改**
+- 更新了Service Worker实现，包含增强的网络优先缓存策略
+- 添加了详细的缓存版本管理和清理机制
+- 完善了离线兜底页面的用户体验
+- 增强了数据加载的重试逻辑和多URL回退机制
+- 优化了请求拦截策略和错误处理
+
 ## 目录
 1. [简介](#简介)
 2. [项目结构](#项目结构)
@@ -24,31 +32,33 @@
 ## 简介
 本文件面向GitHub Treasure Repo的PWA离线能力，系统性说明Service Worker配置与缓存策略、应用清单与安装提示、离线数据加载与失效处理、网络状态监听、跨浏览器兼容性与性能优化技巧，并提供调试与排障指南。目标是帮助开发者快速理解并维护该PWA的离线体验。
 
+**更新** 本次更新重点反映了增强的离线支持功能，包括全面的Service Worker实现、网络优先缓存策略、缓存版本管理以及离线兜底页面。
+
 ## 项目结构
 PWA相关的前端资源位于web目录，关键文件如下：
-- Service Worker: web/sw.js
+- Service Worker: web/sw.js（包含增强的缓存策略）
 - 应用清单: web/manifest.json
 - 入口页面: web/index.html（注册SW）
-- 主逻辑脚本: web/app.js（数据加载与UI交互）
-- 离线兜底页: web/offline.html
+- 主逻辑脚本: web/app.js（数据加载与UI交互，包含重试逻辑）
+- 离线兜底页: web/offline.html（完整的离线体验页面）
 
 ```mermaid
 graph TB
-A["index.html<br/>注册Service Worker"] --> B["sw.js<br/>缓存版本/预缓存/拦截"]
-A --> C["app.js<br/>数据加载/渲染"]
+A["index.html<br/>注册Service Worker"] --> B["sw.js<br/>网络优先缓存/版本管理/拦截"]
+A --> C["app.js<br/>多URL回退/重试机制"]
 B --> D["Cache Storage<br/>按版本管理缓存"]
 B --> E["网络请求<br/>fetch事件"]
 C --> F["data/repos.json<br/>数据源"]
-B --> G["offline.html<br/>离线兜底页"]
+B --> G["offline.html<br/>完整离线兜底页"]
 ```
 
-图表来源
+**图表来源**
 - [web/index.html:276-282](file://web/index.html#L276-L282)
 - [web/sw.js:1-78](file://web/sw.js#L1-L78)
 - [web/app.js:401-453](file://web/app.js#L401-L453)
 - [web/offline.html:1-70](file://web/offline.html#L1-L70)
 
-章节来源
+**章节来源**
 - [web/index.html:1-284](file://web/index.html#L1-L284)
 - [web/sw.js:1-128](file://web/sw.js#L1-L128)
 - [web/manifest.json:1-16](file://web/manifest.json#L1-L16)
@@ -56,24 +66,28 @@ B --> G["offline.html<br/>离线兜底页"]
 - [web/offline.html:1-70](file://web/offline.html#L1-L70)
 
 ## 核心组件
-- Service Worker（sw.js）
-  - 定义缓存版本号，用于增量更新与清理旧缓存
-  - 在install阶段预缓存“壳资源”（HTML/CSS/JS/离线页）
+- **Service Worker（sw.js）**
+  - 定义缓存版本号 `CACHE_VERSION = 'repo-hoarder-v2-r1'`，用于增量更新与清理旧缓存
+  - 在install阶段预缓存"壳资源"（HTML/CSS/JS/离线页）
   - 在activate阶段清理旧缓存并接管客户端
   - 在fetch阶段实现差异化策略：
-    - /data/路径：网络优先，成功后写入缓存；失败回退到缓存
+    - /data/路径：**网络优先**，成功后写入缓存；失败回退到缓存
     - 其他静态资源：先命中缓存，再后台更新；导航失败时返回离线页
-- 应用清单（manifest.json）
+- **应用清单（manifest.json）**
   - 提供应用名称、启动URL、显示模式、主题色、图标等
-- 入口页面（index.html）
+- **入口页面（index.html）**
   - 声明manifest链接
   - 条件注册Service Worker
-- 主逻辑（app.js）
-  - 负责从data/repos.json加载数据，包含重试与错误提示
-- 离线兜底页（offline.html）
-  - 简洁的离线提示与重试按钮
+- **主逻辑（app.js）**
+  - 负责从data/repos.json加载数据，包含**多重URL回退**与**重试机制**
+  - 支持多个数据URL：`../data/repos.json`、`./data/repos.json`、`data/repos.json`
+  - 最大重试次数为2次，带指数退避延迟
+- **离线兜底页（offline.html）**
+  - 精美的离线提示界面，包含重试按钮和友好提示信息
 
-章节来源
+**更新** 新增了增强的重试逻辑、多URL回退机制和完整的离线页面设计。
+
+**章节来源**
 - [web/sw.js:1-78](file://web/sw.js#L1-L78)
 - [web/manifest.json:1-16](file://web/manifest.json#L1-L16)
 - [web/index.html:276-282](file://web/index.html#L276-L282)
@@ -98,7 +112,7 @@ Note over SW,CS : 仅预缓存必要壳资源，提升首屏速度
 U->>H : 发起请求
 H->>SW : fetch事件
 alt 请求为/data/*
-SW->>N : 网络优先
+SW->>N : 网络优先请求
 N-->>SW : 成功响应
 SW->>CS : 写入缓存
 SW-->>H : 返回网络响应
@@ -124,7 +138,7 @@ end
 end
 ```
 
-图表来源
+**图表来源**
 - [web/index.html:276-282](file://web/index.html#L276-L282)
 - [web/sw.js:11-78](file://web/sw.js#L11-L78)
 - [web/offline.html:1-70](file://web/offline.html#L1-L70)
@@ -132,16 +146,21 @@ end
 ## 详细组件分析
 
 ### Service Worker（sw.js）
-- 缓存版本管理
-  - 使用常量定义当前缓存版本名，便于增量升级与清理旧缓存
+**更新** 实现了增强的网络优先缓存策略和完善的错误处理机制
+
+- **缓存版本管理**
+  - 使用常量 `CACHE_VERSION = 'repo-hoarder-v2-r1'` 定义当前缓存版本名
   - activate事件中遍历所有缓存键，删除非当前版本的缓存
-- 预缓存策略
+  - 确保缓存版本升级时的平滑过渡
+- **预缓存策略**
   - install事件中打开当前版本缓存，批量添加壳资源（首页、样式、脚本、离线页）
-- 请求拦截策略
+  - 预缓存列表包含：`./`, `./index.html`, `./styles.css`, `./app.js`, `./offline.html`
+- **请求拦截策略**
   - 过滤非GET请求
-  - 对/data/路径采用“网络优先+缓存回退”，并在成功时写回缓存
-  - 对其他资源采用“缓存优先+后台更新”，导航失败时返回离线页
-- 激活与接管
+  - 对/data/路径采用**网络优先+缓存回退**，并在成功时写回缓存
+  - 对其他资源采用**缓存优先+后台更新**，导航失败时返回离线页
+  - 实现了完整的错误处理和降级策略
+- **激活与接管**
   - activate后调用clients.claim()使新SW立即生效于已打开的页面
 
 ```mermaid
@@ -165,26 +184,26 @@ NavMode --> |是| OfflinePage["返回offline.html"]
 NavMode --> |否| Error503["返回503或空响应"]
 ```
 
-图表来源
+**图表来源**
 - [web/sw.js:33-78](file://web/sw.js#L33-L78)
 - [web/offline.html:1-70](file://web/offline.html#L1-L70)
 
-章节来源
+**章节来源**
 - [web/sw.js:1-78](file://web/sw.js#L1-L78)
 
 ### 应用清单（manifest.json）
-- 应用元信息
+- **应用元信息**
   - name/short_name/description：应用名称与描述
   - start_url：应用启动入口
   - display：standalone，以独立窗口运行
   - background_color/theme_color：主题与背景色
-- 图标设置
+- **图标设置**
   - icons数组中通过SVG data URI提供矢量图标，适配不同尺寸
-- 安装提示逻辑
+- **安装提示逻辑**
   - 清单本身不触发安装提示；通常由前端根据可安装性判断后调用Web App Install Prompt API
   - 本项目清单满足基本字段要求，可作为安装前提之一
 
-章节来源
+**章节来源**
 - [web/manifest.json:1-16](file://web/manifest.json#L1-L16)
 
 ### 入口页面（index.html）
@@ -192,28 +211,44 @@ NavMode --> |否| Error503["返回503或空响应"]
 - 条件注册Service Worker：检测navigator.serviceWorker存在后，在window.load时注册./sw.js
 - 引入主脚本app.js
 
-章节来源
+**章节来源**
 - [web/index.html:9-13](file://web/index.html#L9-L13)
 - [web/index.html:276-282](file://web/index.html#L276-L282)
 
 ### 主逻辑（app.js）
-- 数据加载
-  - 定义DATA_URL指向../data/repos.json，并尝试多个相对路径作为备选
-  - 具备重试机制与友好错误提示（包括file协议与本地服务器提示）
-- UI与交互
-  - 大量业务逻辑（筛选、排序、书签、对比、分享等），与PWA离线能力无直接耦合
-- 与PWA的关系
-  - 当网络不可用时，若/data/repos.json已被缓存，则可通过缓存读取；否则需依赖后端或离线数据
+**更新** 实现了增强的数据加载机制，包含多重回退和重试逻辑
 
-章节来源
+- **数据加载**
+  - 定义DATA_URL指向../data/repos.json，并尝试多个相对路径作为备选
+  - 支持三个数据URL：`../data/repos.json`、`./data/repos.json`、`data/repos.json`
+  - 具备**重试机制**（最多2次）与**指数退避**（2秒、4秒延迟）
+  - 包含友好的错误提示（包括file协议与本地服务器提示）
+- **UI与交互**
+  - 大量业务逻辑（筛选、排序、书签、对比、分享等），与PWA离线能力无直接耦合
+- **与PWA的关系**
+  - 当网络不可用时，若/data/repos.json已被缓存，则可通过缓存读取
+  - 否则需依赖后端或离线数据，结合Service Worker的缓存回退机制
+
+**更新** 新增了多重URL回退、重试机制和更好的错误处理。
+
+**章节来源**
 - [web/app.js:1-10](file://web/app.js#L1-L10)
 - [web/app.js:401-453](file://web/app.js#L401-L453)
 
 ### 离线兜底页（offline.html）
-- 纯静态页面，提供离线提示与重试按钮
-- 被sw.js在导航失败时返回，确保用户体验一致
+**更新** 提供了完整的离线体验界面
 
-章节来源
+- **精美设计**
+  - 纯静态页面，采用与主应用一致的深色主题设计
+  - 包含SVG图标、友好的中文提示信息和重试按钮
+- **用户体验**
+  - 清晰的离线状态说明："无法连接到服务器。请检查网络连接后重试。"
+  - 提示用户如果之前访问过，数据可能已缓存在本地
+  - 提供一键重试功能，刷新页面重新尝试连接
+- **集成机制**
+  - 被sw.js在导航失败时返回，确保用户体验一致
+
+**章节来源**
 - [web/offline.html:1-70](file://web/offline.html#L1-L70)
 
 ## 依赖关系分析
@@ -233,94 +268,100 @@ APP --> DATA["data/repos.json"]
 SW --> OFF["offline.html"]
 ```
 
-图表来源
+**图表来源**
 - [web/index.html:9-13](file://web/index.html#L9-L13)
 - [web/sw.js:1-78](file://web/sw.js#L1-L78)
 - [web/app.js:401-453](file://web/app.js#L401-L453)
 - [web/offline.html:1-70](file://web/offline.html#L1-L70)
 
-章节来源
+**章节来源**
 - [web/index.html:1-284](file://web/index.html#L1-L284)
 - [web/sw.js:1-128](file://web/sw.js#L1-L128)
 - [web/app.js:1-800](file://web/app.js#L1-L800)
 - [web/offline.html:1-70](file://web/offline.html#L1-L70)
 
 ## 性能考量
-- 预缓存最小化
-  - 仅预缓存壳资源，避免将大体积数据纳入预缓存，减少首次安装时间
-- 按需缓存
-  - 对/data/*采用网络优先，保证数据新鲜度；仅在成功时写入缓存，避免污染脏数据
-- 后台更新
-  - 对静态资源采用缓存优先+后台更新，兼顾速度与一致性
-- 导航回退
-  - 导航失败返回轻量离线页，降低带宽与渲染开销
-- 版本化与清理
-  - 通过版本常量与activate清理旧缓存，防止存储膨胀
+**更新** 基于增强的缓存策略和重试机制的性能优化
 
-[本节为通用指导，无需源码引用]
+- **预缓存最小化**
+  - 仅预缓存壳资源，避免将大体积数据纳入预缓存，减少首次安装时间
+- **按需缓存**
+  - 对/data/*采用网络优先，保证数据新鲜度；仅在成功时写入缓存，避免污染脏数据
+- **后台更新**
+  - 对静态资源采用缓存优先+后台更新，兼顾速度与一致性
+- **导航回退**
+  - 导航失败返回轻量离线页，降低带宽与渲染开销
+- **版本化与清理**
+  - 通过版本常量与activate清理旧缓存，防止存储膨胀
+- **重试优化**
+  - 数据加载采用指数退避重试，避免频繁请求造成网络拥塞
+- **多URL回退**
+  - 支持多个数据URL路径，提高在不同部署环境下的可靠性
 
 ## 故障排除指南
-- 无法加载数据
-  - 现象：页面提示“无法加载数据”
+**更新** 基于增强功能的故障排除指导
+
+- **无法加载数据**
+  - 现象：页面提示"无法加载数据"
   - 原因：通过file://协议直接打开页面，浏览器阻止fetch；或本地数据文件缺失
   - 解决：使用本地HTTP服务（如python3 -m http.server 8000）或在仓库根目录执行数据抓取脚本生成repos.json
-- 离线状态下无法获取最新数据
+- **离线状态下无法获取最新数据**
   - 现象：刷新后仍显示旧数据或空白
   - 原因：/data/*在网络失败时回退到缓存；若缓存为空则无数据
   - 解决：恢复网络后刷新；或检查sw.js是否正确缓存了/data/repos.json
-- 安装提示未出现
+- **安装提示未出现**
   - 现象：浏览器未弹出安装提示
   - 原因：清单不完整、HTTPS限制、未满足可安装性条件、未在前端调用安装API
   - 解决：确认manifest字段完整、部署在HTTPS环境、在合适时机调用安装API
-- Service Worker未生效
+- **Service Worker未生效**
   - 现象：修改sw.js后行为未变化
   - 原因：旧SW仍在控制页面
   - 解决：在activate中调用clients.claim()（已实现），或通过开发者工具强制更新/卸载旧SW
+- **数据加载失败但重试无效**
+  - 现象：多次重试后仍然失败
+  - 原因：所有数据URL都不可用或网络完全不可达
+  - 解决：检查网络连接、确认数据文件位置正确、验证服务器响应状态
 
-章节来源
+**章节来源**
 - [web/app.js:401-453](file://web/app.js#L401-L453)
 - [web/sw.js:20-31](file://web/sw.js#L20-L31)
 - [web/manifest.json:1-16](file://web/manifest.json#L1-L16)
 
 ## 结论
-该PWA通过合理的缓存版本管理、最小化的预缓存、差异化的请求拦截策略以及离线兜底页，实现了良好的离线可用性与性能表现。建议在后续迭代中补充显式的安装提示逻辑、完善网络状态监听与更细粒度的缓存失效策略，以提升整体用户体验与可维护性。
-
-[本节为总结，无需源码引用]
+该PWA通过合理的缓存版本管理、最小化的预缓存、差异化的请求拦截策略以及离线兜底页，实现了良好的离线可用性与性能表现。**更新后的实现**进一步增强了可靠性，包括网络优先缓存策略、多重数据URL回退、智能重试机制和精美的离线体验页面。建议在后续迭代中补充显式的安装提示逻辑、完善网络状态监听与更细粒度的缓存失效策略，以提升整体用户体验与可维护性。
 
 ## 附录
 
 ### PWA安装流程（概念）
-- 前置条件
+- **前置条件**
   - 有效的manifest.json
   - HTTPS环境
   - 至少一个可安装的图标
-- 触发安装
+- **触发安装**
   - 前端检测可安装性后，调用安装API弹出系统提示
   - 用户确认后，应用添加到桌面并可独立运行
-- 卸载与更新
+- **卸载与更新**
   - 通过系统设置卸载
   - 新版本发布后，SW会在activate阶段接管并清理旧缓存
 
-[本节为概念说明，无需源码引用]
-
 ### 跨浏览器兼容性处理（概念）
-- 特性检测
+- **特性检测**
   - 注册SW前检测navigator.serviceWorker
   - 安装提示前检测beforeinstallprompt或自定义可安装性判断
-- 降级策略
+- **降级策略**
   - 不支持PWA的浏览器仍可正常访问在线功能
   - 离线场景下尽可能提供基础内容或明确提示
 
-[本节为概念说明，无需源码引用]
-
 ### 调试PWA应用的工具与步骤
-- Chrome DevTools
+- **Chrome DevTools**
   - Application面板查看Manifest、Service Workers、Cache Storage
   - Network面板勾选Offline模拟离线场景
   - Performance面板评估首屏与缓存命中
-- 常见操作
+- **常见操作**
   - 强制更新SW：在Application > Service Workers中点击Update
   - 删除缓存：在Cache Storage中删除对应版本
   - 验证离线：切换到Offline后刷新，观察是否命中缓存或返回离线页
-
-[本节为通用指导，无需源码引用]
+- **调试增强功能**
+  - 检查重试机制：在Network面板观察重试请求和延迟
+  - 验证多URL回退：监控不同数据URL的访问情况
+  - 测试离线体验：断网后验证offline.html的显示效果

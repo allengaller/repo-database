@@ -1,6 +1,6 @@
 schema_version: 1
 module_path: web_app
-title: GitHub 宝藏仓库前端展示应用
+title: GitHub 宝藏仓库静态展示站点
 scope:
     - web/
 source_files: []

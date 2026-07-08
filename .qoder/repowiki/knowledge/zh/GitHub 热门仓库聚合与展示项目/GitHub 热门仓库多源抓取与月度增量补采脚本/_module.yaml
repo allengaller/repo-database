@@ -1,6 +1,6 @@
 schema_version: 1
 module_path: data_pipeline
-title: GitHub 宝藏仓库数据抓取与月度更新流水线
+title: GitHub 热门仓库多源抓取与月度增量补采脚本
 scope:
     - scripts/
     - data/

@@ -3,11 +3,11 @@ schema_version: 1
 locale: zh-CN
 branch: main
 nodes_managed: true
-exported_at: "2026-07-07T16:54:00Z"
+exported_at: "2026-07-08T14:07:58Z"
 modules:
     "":
-        dir_name: RepoHoarder · GitHub 宝藏仓库聚合与展示
-        title: RepoHoarder · GitHub 宝藏仓库聚合与展示
+        dir_name: GitHub 热门仓库聚合与展示项目
+        title: GitHub 热门仓库聚合与展示项目
         scope:
             - README.md
             - README.zh-CN.md
@@ -17,12 +17,13 @@ modules:
         children:
             - data_pipeline
             - mind_coach_research
+            - research_psychology_projects
             - web_app
         depends_on: []
         related_to: []
     data_pipeline:
-        dir_name: GitHub 宝藏仓库数据抓取与月度更新流水线
-        title: GitHub 宝藏仓库数据抓取与月度更新流水线
+        dir_name: GitHub 热门仓库多源抓取与月度增量补采脚本
+        title: GitHub 热门仓库多源抓取与月度增量补采脚本
         scope:
             - scripts/
             - data/
@@ -39,10 +40,21 @@ modules:
         source_files: []
         children: []
         depends_on: []
-        related_to: []
+        related_to:
+            - path: research_psychology_projects
+    research_psychology_projects:
+        dir_name: 心理学相关开源项目研究索引
+        title: 心理学相关开源项目研究索引
+        scope:
+            - research/psychology-projects/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: mind_coach_research
     web_app:
-        dir_name: GitHub 宝藏仓库前端展示应用
-        title: GitHub 宝藏仓库前端展示应用
+        dir_name: GitHub 宝藏仓库静态展示站点
+        title: GitHub 宝藏仓库静态展示站点
         scope:
             - web/
         source_files: []

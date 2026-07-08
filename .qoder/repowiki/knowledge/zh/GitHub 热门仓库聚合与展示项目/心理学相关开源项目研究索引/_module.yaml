@@ -1,0 +1,9 @@
+schema_version: 1
+module_path: research_psychology_projects
+title: 心理学相关开源项目研究索引
+scope:
+    - research/psychology-projects/
+source_files: []
+depends_on: []
+related_to:
+    - path: mind_coach_research

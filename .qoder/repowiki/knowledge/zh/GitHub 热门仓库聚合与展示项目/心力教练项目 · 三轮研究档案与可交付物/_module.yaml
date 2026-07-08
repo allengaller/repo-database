@@ -5,4 +5,5 @@ scope:
     - research/mind-coach/
 source_files: []
 depends_on: []
-related_to: []
+related_to:
+    - path: research_psychology_projects
