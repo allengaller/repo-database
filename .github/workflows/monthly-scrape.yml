@@ -8,6 +8,8 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -26,6 +28,20 @@ jobs:
         run: python scripts/scrape.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate data integrity
+        run: |
+          python -c "
+          import json, sys
+          data = json.load(open('data/repos.json'))
+          total = data.get('total', 0)
+          repos = len(data.get('repos', []))
+          print(f'Data check: total={total}, repos={repos}')
+          if repos < 100:
+              print(f'ERROR: Only {repos} repos found, expected >= 100. Aborting.')
+              sys.exit(1)
+          print('Data integrity check passed.')
+          "
 
       - name: Commit and push data
         run: |

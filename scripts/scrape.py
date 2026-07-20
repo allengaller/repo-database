@@ -19,6 +19,9 @@ except ImportError:
     print("Error: 'requests' package is required. Install with: pip install -r requirements.txt")
     sys.exit(1)
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from common import get_headers, calculate_score, merge_repo  # noqa: E402
+
 # Configuration
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 MIN_STARS = 500
@@ -98,17 +101,6 @@ GITHUB_NON_REPO_OWNERS = {
     "login",
     "signup",
 }
-
-
-def get_headers():
-    """Build request headers with optional GitHub token"""
-    headers = {
-        "User-Agent": "Mozilla/5.0 (repo-hoarder)",
-        "Accept": "application/vnd.github.v3+json",
-    }
-    if GITHUB_TOKEN:
-        headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
-    return headers
 
 
 def get_session():
@@ -548,7 +540,7 @@ def format_api_repo(r):
     return {
         "name": r["full_name"],
         "url": r["html_url"],
-        "description": r.get("description") or "暂无描述",
+        "description": r.get("description") or "",
         "stars": r["stargazers_count"],
         "forks": r["forks_count"],
         "language": r.get("language") or "Unknown",
@@ -557,19 +549,6 @@ def format_api_repo(r):
         "fetched_at": datetime.now().isoformat(),
         "source": "github_api",
     }
-
-
-def calculate_score(repo):
-    """Calculate treasure score.
-
-    score = stars + forks + (forks/stars)*1000 + today_stars*10 + commits_4w*2
-    """
-    stars = repo.get("stars", 0)
-    forks = repo.get("forks", 0)
-    today = repo.get("today_stars", 0)
-    commits = repo.get("commit_activity", 0)
-    fork_ratio = forks / stars if stars > 0 else 0
-    return round(stars + forks + fork_ratio * 1000 + today * 10 + commits * 2, 2)
 
 
 def merge_and_sort(all_repos):
@@ -585,30 +564,7 @@ def merge_and_sort(all_repos):
     for repo in all_repos.values():
         name = repo["name"]
         if name in unique:
-            existing = unique[name]
-            existing["stars"] = max(existing.get("stars", 0), repo.get("stars", 0))
-            existing["forks"] = max(existing.get("forks", 0), repo.get("forks", 0))
-            existing["today_stars"] = max(
-                existing.get("today_stars", 0), repo.get("today_stars", 0)
-            )
-            existing["commit_activity"] = max(
-                existing.get("commit_activity", 0), repo.get("commit_activity", 0)
-            )
-            if existing.get("language") in (None, "Unknown") and repo.get("language") not in (
-                None,
-                "Unknown",
-            ):
-                existing["language"] = repo["language"]
-            if (not existing.get("description") or existing["description"] == "暂无描述") and repo.get(
-                "description"
-            ):
-                existing["description"] = repo["description"]
-            old_src = existing.get("source", "") or ""
-            new_src = repo.get("source", "") or ""
-            merged_sources = sorted({s for s in (old_src, new_src) if s})
-            existing["source"] = "+".join(merged_sources)
-            if repo.get("fetched_at", "") > existing.get("fetched_at", ""):
-                existing["fetched_at"] = repo["fetched_at"]
+            merge_repo(unique[name], repo)
         else:
             unique[name] = repo
 

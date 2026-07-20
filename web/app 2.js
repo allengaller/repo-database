@@ -12,7 +12,6 @@ let visibleStart = 0;
 let visibleCount = 50;
 const CARD_HEIGHT = 180;
 const BUFFER = 5;
-let cachedMaxStars = 1;
 
 const LANG_ICONS = {
   'Python': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C6.48 2 6 4.24 6 6v2h6v1H5.5C3.02 9 2 10.02 2 12.5v1C2 15.98 3.02 17 5.5 17H6v2c0 1.76.48 4 6 4s6-2.24 6-4v-2h.5c2.48 0 3.5-1.02 3.5-3.5v-1c0-2.48-1.02-3.5-3.5-3.5H18V6c0-1.76-.48-4-6-4zm-2 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm5 4H9c-.55 0-1-.45-1-1s.45-1 1-1h6c.55 0 1 .45 1 1s-.45 1-1 1z"/></svg>`,
@@ -214,7 +213,6 @@ function initLanguage() {
 function toggleLanguage() {
   currentLang = currentLang === 'zh' ? 'en' : 'zh';
   localStorage.setItem('language', currentLang);
-  document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
   applyTranslations();
   applyTranslationsToUI();
 }
@@ -420,7 +418,6 @@ async function loadRepos(retryCount = 0) {
     const json = await response.json();
 
     allRepos = json.repos || [];
-    cachedMaxStars = Math.max(...allRepos.map(r => r.stars), 1);
     isLoading = false;
     updateStats(json.fetched_at);
     extractLanguages();
@@ -936,7 +933,7 @@ function createCard(repo, index) {
   const noDesc = currentLang === 'zh' ? '暂无描述' : 'No description';
   const tags = getRepoTags(repo);
   const license = getLicense(repo);
-  const maxStars = cachedMaxStars;
+  const maxStars = Math.max(...allRepos.map(r => r.stars), 1);
   const sparkline = repo.stars > 1000 ? getSparklinePath(repo.stars, maxStars) : '';
   const activity = getActivityLevel(repo);
 
@@ -1348,16 +1345,7 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-let scrollTicking = false;
-window.addEventListener('scroll', () => {
-  if (!scrollTicking) {
-    scrollTicking = true;
-    requestAnimationFrame(() => {
-      handleScroll();
-      scrollTicking = false;
-    });
-  }
-});
+window.addEventListener('scroll', debounce(handleScroll, 16));
 
 // Share URL functionality
 function updateShareUrl() {

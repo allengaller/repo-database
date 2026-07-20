@@ -22,28 +22,13 @@ except ImportError:
     print("Error: 'requests' package is required. Install with: pip install -r requirements.txt")
     sys.exit(1)
 
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
-DATA_FILE = "data/repos.json"
-
-LANGUAGES = [
-    "python", "javascript", "typescript", "go", "rust", "java",
-    "cpp", "c", "ruby", "swift", "kotlin", "dart", "csharp", "shell"
-]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from common import GITHUB_TOKEN, DATA_FILE, LANGUAGES, get_headers, calculate_score, merge_repo
 
 TOPICS = [
     "AI agent", "LLM", "claude", "RAG", "coding assistant",
     "openclaw", "codex", "cursor", "skills"
 ]
-
-
-def get_headers():
-    headers = {
-        "User-Agent": "Mozilla/5.0 (repo-hoarder)",
-        "Accept": "application/vnd.github.v3+json"
-    }
-    if GITHUB_TOKEN:
-        headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
-    return headers
 
 
 def search_repos(query, per_page=100, page=1):
@@ -138,7 +123,7 @@ def format_repo(r, month_tag):
     return {
         "name": r["full_name"],
         "url": r["html_url"],
-        "description": r.get("description") or "暂无描述",
+        "description": r.get("description") or "",
         "stars": r["stargazers_count"],
         "forks": r["forks_count"],
         "language": r.get("language") or "Unknown",
@@ -149,19 +134,6 @@ def format_repo(r, month_tag):
         "created_at": r.get("created_at"),
         "month_tag": month_tag
     }
-
-
-def calculate_score(repo):
-    """Calculate treasure score (aligned with scrape.py).
-
-    score = stars + forks + (forks/stars)*1000 + today_stars*10 + commit_activity*2
-    """
-    stars = repo.get("stars", 0)
-    forks = repo.get("forks", 0)
-    today = repo.get("today_stars", 0)
-    commits = repo.get("commit_activity", 0)
-    ratio = forks / stars if stars > 0 else 0
-    return round(stars + forks + ratio * 1000 + today * 10 + commits * 2, 2)
 
 
 def merge_with_existing(new_repos):
@@ -186,26 +158,7 @@ def merge_with_existing(new_repos):
             new_count += 1
             existing[name] = repo
         else:
-            # Field-wise merge: take max of numeric signals, prefer richer data
-            ex = existing[name]
-            ex["stars"] = max(ex.get("stars", 0), repo.get("stars", 0))
-            ex["forks"] = max(ex.get("forks", 0), repo.get("forks", 0))
-            ex["today_stars"] = max(ex.get("today_stars", 0), repo.get("today_stars", 0))
-            ex["commit_activity"] = max(ex.get("commit_activity", 0), repo.get("commit_activity", 0))
-            if ex.get("language") in (None, "Unknown") and repo.get("language") not in (None, "Unknown"):
-                ex["language"] = repo["language"]
-            if (not ex.get("description") or ex["description"] == "暂无描述") and repo.get("description"):
-                ex["description"] = repo["description"]
-            # Preserve month_tag if new repo has one
-            if repo.get("month_tag") and not ex.get("month_tag"):
-                ex["month_tag"] = repo["month_tag"]
-            old_src = ex.get("source", "") or ""
-            new_src = repo.get("source", "") or ""
-            merged_sources = sorted({s for s in old_src.split("+") + new_src.split("+") if s})
-            ex["source"] = "+".join(merged_sources)
-            if repo.get("fetched_at", "") > ex.get("fetched_at", ""):
-                ex["fetched_at"] = repo["fetched_at"]
-            ex["score"] = calculate_score(ex)
+            merge_repo(existing[name], repo)
             updated += 1
 
     result = sorted(existing.values(), key=lambda x: x["score"], reverse=True)

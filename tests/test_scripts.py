@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
 import scrape  # noqa: E402
 import update_monthly  # noqa: E402
+import common  # noqa: E402
 
 
 # ---------- parse_num --------------------------------------------------------
@@ -246,14 +247,14 @@ def test_update_monthly_calculate_score_with_momentum():
 # ---------- headers ---------------------------------------------------------
 
 def test_get_headers_without_token(monkeypatch):
-    monkeypatch.setattr(scrape, "GITHUB_TOKEN", None)
+    monkeypatch.setattr(common, "GITHUB_TOKEN", None)
     headers = scrape.get_headers()
     assert "Authorization" not in headers
     assert headers["User-Agent"].startswith("Mozilla")
 
 
 def test_get_headers_with_token(monkeypatch):
-    monkeypatch.setattr(scrape, "GITHUB_TOKEN", "ghp_xxx")
+    monkeypatch.setattr(common, "GITHUB_TOKEN", "ghp_xxx")
     assert scrape.get_headers()["Authorization"] == "Bearer ghp_xxx"
 
 

@@ -1,0 +1,21 @@
+[project]
+name = "repo-hoarder"
+version = "1.0.0"
+description = "Automated GitHub treasure repo aggregator"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.28,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.4",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
