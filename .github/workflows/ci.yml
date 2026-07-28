@@ -15,16 +15,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
         with:
           python-version: '3.11'
-          cache: 'pip'
 
       - name: Install dependencies
+        # uv sync honours the committed uv.lock for fully reproducible installs.
+        # Falls back to requirements.txt when running outside a uv-enabled clone.
         run: |
-          pip install -r requirements.txt
-          pip install pytest
+          if command -v uv >/dev/null 2>&1 && [ -f uv.lock ]; then
+            uv sync --extra dev --frozen
+          else
+            pip install -r requirements.txt
+          fi
 
       - name: Run tests
         run: pytest tests/ -v --tb=short

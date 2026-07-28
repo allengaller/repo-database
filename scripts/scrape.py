@@ -138,14 +138,42 @@ def fetch_commit_activity(owner, repo):
         return 0
 
 
+def _collapse_badge_links(md):
+    """Replace ``[![alt](image-url)](github-url)`` patterns with a plain
+    markdown link ``[x](github-url)`` so the simple regex below can match
+    them as ordinary GitHub URLs."""
+    return re.sub(
+        r"\[!\[[^\]]*\]\([^)]*\)\]\((https?://github\.com/[^)]+)\)",
+        r"[x](\1)",
+        md,
+    )
+
+
 def parse_awesome_list(content):
-    """Parse awesome list markdown to extract repo URLs"""
+    """Parse awesome list markdown to extract GitHub repo full names.
+
+    Improvements over a naive single-line regex:
+
+    * Strips leading/trailing whitespace and trailing punctuation
+      (``.,;:!?``) which frequently leaks into URLs.
+    * Pre-collapses badge-style ``[![alt](...)](github-url)`` wrappers
+      so nested image-link patterns still match the underlying repo.
+    * Removes the historical 50-repo cap; the caller rate-limits itself
+      and many awesome lists have far more than 50 quality entries.
+    """
+    # First collapse any badge-wrapped links to their outer URL only.
+    content = _collapse_badge_links(content)
     repos = set()
+    pattern = (
+        r"\[([^\]]+)\]"
+        r"\(\s*https?://github\.com/"
+        r"([A-Za-z0-9_.-]+)/"
+        r"([A-Za-z0-9_.-]+)"
+        r"(?:/[^\s)]*)?"
+        r"\)"
+    )
 
-    # Match markdown links to GitHub repos: [text](https://github.com/owner/repo)
-    pattern = r"\[([^\]]*)\]\(https?://github\.com/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_.-]+)/?[^)]*\)"
-
-    for line in content.split("\n"):
+    for line in content.splitlines():
         for match in re.finditer(pattern, line):
             owner, repo = match.group(2), match.group(3)
             # Skip common non-repo paths and self-references
@@ -153,12 +181,17 @@ def parse_awesome_list(content):
                 continue
             if "awesome-" in repo.lower():
                 continue
-            # Clean trailing artifacts
-            repo = repo.rstrip("/").split("#")[0].split("?")[0]
+            # Strip trailing punctuation that may have leaked into the URL
+            # e.g. ``[Flask](https://github.com/foo/bar).`` → "bar."
+            repo = repo.rstrip(".,;:!?'\"")
+            if not repo:
+                continue
+            # Clean common URL fragments
+            repo = repo.split("#")[0].split("?")[0]
             if repo and owner:
                 repos.add(f"{owner}/{repo}")
 
-    return list(repos)[:50]
+    return sorted(repos)
 
 
 def fetch_github_repo_details(owner, repo):
@@ -668,5 +701,24 @@ def main():
     print(f"   Languages: {lang_count}")
 
 
+def _configure_stdout():
+    """Ensure stdout can emit non-ASCII (emoji, Chinese) without crashing.
+
+    On Windows runners or containers with a C/POSIX locale, the default
+    UTF-8 encoding of stdout isn't applied — emoji in print() raise
+    UnicodeEncodeError. ``reconfigure(encoding="utf-8")`` is a no-op
+    when already configured but safely upgrades the stream otherwise.
+    """
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
+        sys.stderr.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
+    except (AttributeError, ValueError):
+        # AttributeError: stream doesn't support reconfigure (older Python,
+        # captured pipes, or already-closed handles).
+        # ValueError: stream is read-only / non-text stream.
+        pass
+
+
 if __name__ == "__main__":
+    _configure_stdout()
     main()

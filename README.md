@@ -51,6 +51,13 @@ An open-source, fully automated aggregator for high-quality GitHub projects. Com
 ```bash
 git clone https://github.com/allengaller/repo-hoarder.git
 cd repo-hoarder
+
+# Option A — use the bundled seed (28 curated repos, no network needed)
+pip install -r requirements.txt
+cd web && python3 -m http.server 8000
+# open http://localhost:8000
+
+# Option B — fetch the live dataset (~5 min, requires GITHUB_TOKEN for full coverage)
 pip install -r requirements.txt
 python3 scripts/scrape.py
 cd web && python3 -m http.server 8000

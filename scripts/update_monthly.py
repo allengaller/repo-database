@@ -319,5 +319,16 @@ def main():
         print(f"   Report:         {report_file}")
 
 
+def _configure_stdout():
+    """Ensure stdout/stderr can emit non-ASCII (emoji, CJK) without
+    crashing on Windows runners or POSIX-locale containers."""
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
+        sys.stderr.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
+    except (AttributeError, ValueError):
+        pass
+
+
 if __name__ == "__main__":
+    _configure_stdout()
     main()

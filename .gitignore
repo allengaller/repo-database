@@ -23,5 +23,7 @@ build/
 # Logs
 *.log
 
-# Data (generated) - except initial seed data
-data/repos.json
+# data/repos.json is a curated seed committed to the repo (see .gitattributes
+# marking it `-diff -merge` so monthly CI updates stay clean). Local scrapes
+# that produce a different path or filename remain ignored by virtue of being
+# outside the tracked set.
