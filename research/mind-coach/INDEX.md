@@ -31,16 +31,16 @@
 
 ## 开源项目深度研究
 
-每份报告独立成文件夹，包含 9 个标准章节（概览/基础信息/目录结构/核心分析/技术架构/教练启发/关键摘录/后续问题/相关资源）。综合对比见 [02 报告](02-five-repos-synthesis.md)。
+单仓库深度报告已迁入 [`catalog/`](../../catalog/INDEX.md) 档案库（含 9 个标准章节：概览/基础信息/目录结构/核心分析/技术架构/教练启发/关键摘录/后续问题/相关资源）。综合对比见 [02 报告](02-five-repos-synthesis.md)。
 
-| 项目 | ⭐ | 核心定位 | 报告 |
+| 项目 | ⭐ | 核心定位 | 档案 |
 |------|-----|---------|------|
-| SecurityRonin/alaya | 13 | 唯识"种子-现行-熏习"Rust 记忆引擎 | [alaya/REPORT.md](repos/alaya/REPORT.md) |
-| giekaton/vipassana-app | 9 | 游戏化内观 PWA（八角形 SVG 觉察-标记） | [vipassana-app/REPORT.md](repos/vipassana-app/REPORT.md) |
-| dosanko-tousan/Gemini-Abhidhamma-Alignment | 3 | 阿毗达磨 × Gemini prompt 框架（减法对齐） | [Gemini-Abhidhamma-Alignment/REPORT.md](repos/Gemini-Abhidhamma-Alignment/REPORT.md) + [PROMPT-ZH.md](repos/Gemini-Abhidhamma-Alignment/PROMPT-ZH.md) |
-| Greatbeing/Yogacara | 1 | 唯识八识全映射 Python agent 框架 | [Yogacara/REPORT.md](repos/Yogacara/REPORT.md) |
-| Greatbeing/yogacara-agent | 0 | LangGraph + 果报系数 RL 唯识 agent | [yogacara-agent/REPORT.md](repos/yogacara-agent/REPORT.md) |
-| FrankNavratil/buddhist-psychology-course | 1 | 30 模块佛教心理学商业课程（$495） | [buddhist-psychology-course/REPORT.md](repos/buddhist-psychology-course/REPORT.md) |
+| SecurityRonin/alaya | 13 | 唯识“种子-现行-熏习”Rust 记忆引擎 | [catalog/mind-philosophy/alaya.md](../../catalog/mind-philosophy/alaya.md) |
+| giekaton/vipassana-app | 9 | 游戏化内观 PWA（八角形 SVG 觉察-标记） | [catalog/mindfulness-apps/vipassana-app.md](../../catalog/mindfulness-apps/vipassana-app.md) |
+| dosanko-tousan/Gemini-Abhidhamma-Alignment | 3 | 阿毗达磨 × Gemini prompt 框架（减法对齐） | [catalog/mind-philosophy/gemini-abhidhamma-alignment.md](../../catalog/mind-philosophy/gemini-abhidhamma-alignment.md) + [PROMPT-ZH.md](repos/Gemini-Abhidhamma-Alignment/PROMPT-ZH.md) |
+| Greatbeing/Yogacara | 1 | 唯识八识全映射 Python agent 框架 | [catalog/mind-philosophy/yogacara.md](../../catalog/mind-philosophy/yogacara.md) |
+| Greatbeing/yogacara-agent | 0 | LangGraph + 果报系数 RL 唯识 agent | [catalog/ai-agents/yogacara-agent.md](../../catalog/ai-agents/yogacara-agent.md) |
+| FrankNavratil/buddhist-psychology-course | 1 | 30 模块佛教心理学商业课程（$495） | [catalog/mind-philosophy/buddhist-psychology-course.md](../../catalog/mind-philosophy/buddhist-psychology-course.md) |
 
 ## 可交付物（可直接使用）
 
@@ -53,7 +53,7 @@
 
 ## 沉淀的 GitHub 同类项目
 
-所有通过脚本发现的 repo 以 JSONL 形式保存在 [`repos/discoveries.jsonl`](repos/discoveries.jsonl)（当前 20+ 条）。
+所有通过脚本发现的 repo 以 JSONL 形式保存在 [`data/discoveries.jsonl`](../../data/discoveries.jsonl)（当前 20+ 条，已升级为全局发现收件箱）。
 
 每行格式：
 ```json
@@ -69,7 +69,7 @@
 }
 ```
 
-运行 [`discover-repos.sh`](discover-repos.sh) 即可增量发现（自动去重）。
+运行 [`python scripts/discover_repos.py`](../../scripts/discover_repos.py) 即可增量发现（自动去重）；对值得深挖的仓库用 `python scripts/catalog.py new <url> --domain <domain>` 建档。
 
 ## 术语对照表
 

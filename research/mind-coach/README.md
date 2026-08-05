@@ -37,11 +37,10 @@ research/mind-coach/
 ├── README.md              本文件
 ├── INDEX.md               所有调研内容的索引
 ├── 01-market-landscape.md 全球市场 + 竞品谱系（2026-06-28）
-├── repos/
-│   └── discoveries.jsonl  持续沉淀的 GitHub 同类项目
-├── discover-repos.py      可复用的检索脚本（Python，基于 gh CLI）
-└── discover-repos.sh      shell 入口（薄封装 discover-repos.py）
+└── repos/                 保留的可交付物（PROMPT-ZH.md、vasana-poc）
 ```
+
+> 单仓库深度报告已迁入 [`catalog/`](../../catalog/INDEX.md) 档案库；发现数据已升级为全局收件箱 [`data/discoveries.jsonl`](../../data/discoveries.jsonl)，检索脚本迁至 [`scripts/discover_repos.py`](../../scripts/discover_repos.py)。
 
 ## 使用方式
 
@@ -53,13 +52,10 @@ research/mind-coach/
 前置：需要 `gh` CLI 已登录（`brew install gh && gh auth login`）。
 
 ```bash
-cd research/mind-coach
-./discover-repos.sh
-# 或者直接
-python3 discover-repos.py
+python3 scripts/discover_repos.py    # 在仓库根目录执行
 ```
 
-脚本会用 `gh search repos` 查询 13 个关键词（中英混合），把新发现的 repo 以 JSONL 追加到 `repos/discoveries.jsonl`。已有 URL **自动去重**不会重复入库。
+脚本会用 `gh search repos` 查询预设关键词（AI/开源 + 心力教练方向），把新发现的 repo 以 JSONL 追加到 `data/discoveries.jsonl`。已有 URL **自动去重**不会重复入库。
 
 可选环境变量：
 - `DISCOVER_LIMIT=8` 每个关键词最多返回多少条（默认 15）

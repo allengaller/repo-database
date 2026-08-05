@@ -8,6 +8,8 @@
 
 全自动聚合 GitHub 优质项目的开源工具，整合 Awesome 榜单 + GitHub API + Hacker News + DEV.to 多源数据，提供智能筛选、灵感探索、收藏管理的一站式体验。
 
+除自动化数据集外，本仓库还维护一座**人工策展知识库**（[`catalog/`](catalog/README.md)）—— 每个重要仓库一篇独立 Markdown 档案（frontmatter 元数据 + 深度分析），按技术领域分类，由 `scripts/catalog.py` 与月度 CI 自动保鲜。
+
 [English](README.md) · [在线访问](https://allengaller.github.io/repo-hoarder/) · [报告问题](https://github.com/allengaller/repo-hoarder/issues)
 
 ---
@@ -75,6 +77,25 @@ python3 scripts/scrape.py
 # 增量更新当月新项目
 python3 scripts/update_monthly.py --year 2026 --month 5 --report
 ```
+
+### 档案库维护
+
+```bash
+# 发现候选仓库（需 gh CLI）→ data/discoveries.jsonl
+python3 scripts/discover_repos.py
+
+# 为值得沉淀的仓库生成档案草稿
+python3 scripts/catalog.py new https://github.com/owner/repo --domain ai-agents
+
+# 重建索引 + 校验全部档案
+python3 scripts/catalog.py index
+python3 scripts/catalog.py validate
+
+# 从 GitHub API 刷新 stars/forks/许可（月度 CI 也会自动执行）
+python3 scripts/catalog.py refresh
+```
+
+分类法、命名规范与档案模板见 [`catalog/README.md`](catalog/README.md)。
 
 ---
 

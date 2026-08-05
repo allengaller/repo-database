@@ -10,6 +10,8 @@
 
 An open-source, fully automated aggregator for high-quality GitHub projects. Combines multiple data sources — **Awesome Lists**, **GitHub Search API**, **Hacker News**, and **DEV.to** — into a single curated catalog with smart filtering, inspiration mode, and bookmark management.
 
+Beyond the automated dataset, the repo maintains a **curated knowledge base** ([`catalog/`](catalog/README.md)) — one Markdown profile per notable repo (frontmatter metadata + in-depth analysis), organized by tech domain and kept fresh by `scripts/catalog.py` and monthly CI.
+
 ---
 
 ## Features
@@ -74,6 +76,25 @@ python3 scripts/scrape.py
 python3 scripts/update_monthly.py --year 2026 --month 6 --report
 ```
 
+### Curating the catalog
+
+```bash
+# Discover candidate repos (gh CLI required) -> data/discoveries.jsonl
+python3 scripts/discover_repos.py
+
+# Draft a profile for a repo worth keeping
+python3 scripts/catalog.py new https://github.com/owner/repo --domain ai-agents
+
+# Rebuild the index and validate all profiles
+python3 scripts/catalog.py index
+python3 scripts/catalog.py validate
+
+# Refresh stars/forks/license from the GitHub API (also run monthly by CI)
+python3 scripts/catalog.py refresh
+```
+
+See [`catalog/README.md`](catalog/README.md) for the taxonomy, naming rules, and profile template.
+
 ### Running tests
 
 ```bash
@@ -133,12 +154,22 @@ score = stars
 repo-hoarder/
 ├── scripts/
 │   ├── scrape.py              # Multi-source aggregator
-│   └── update_monthly.py      # Per-month incremental fetch
+│   ├── update_monthly.py      # Per-month incremental fetch
+│   ├── catalog.py             # Curated catalog manager (new/index/validate/refresh)
+│   └── discover_repos.py      # Keyword-based repo discovery (gh CLI)
 ├── tests/
-│   └── test_scripts.py        # pytest suite (24 cases)
+│   ├── test_scripts.py        # pytest suite for scrapers
+│   └── test_catalog.py        # pytest suite for the catalog manager
 ├── data/
 │   ├── repos.json             # Aggregated dataset
+│   ├── discoveries.jsonl      # Discovery inbox (candidate repos, JSONL)
 │   └── monthly_report_*.md    # Monthly reports
+├── catalog/                   # Curated per-repo Markdown profiles
+│   ├── README.md              # Taxonomy, naming rules, workflows
+│   ├── INDEX.md               # Auto-generated index (by domain/type/month)
+│   ├── _template.md           # Profile template
+│   └── <domain>/<repo>.md     # e.g. ai-agents/, ai-mental-health/, ...
+├── research/                  # Cross-repo research reports (topic-level)
 ├── web/
 │   ├── index.html             # UI entry
 │   ├── styles.css
@@ -147,10 +178,10 @@ repo-hoarder/
 │   └── manifest.json
 ├── docs/                      # Archived history docs
 ├── .github/workflows/
-│   ├── ci.yml                 # PR/push tests
+│   ├── ci.yml                 # PR/push tests + catalog validation
 │   ├── deploy-pages.yml
 │   ├── monthly-scrape.yml
-│   └── monthly-update.yml
+│   └── monthly-update.yml     # Monthly fetch + catalog refresh/index
 └── requirements.txt
 ```
 

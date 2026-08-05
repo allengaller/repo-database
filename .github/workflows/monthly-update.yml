@@ -65,6 +65,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Refresh catalog profiles
+        run: |
+          python scripts/catalog.py refresh
+          python scripts/catalog.py index
+          python scripts/catalog.py validate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build summary
         run: |
           REPORT="data/monthly_report_${{ steps.target.outputs.tag }}.md"
@@ -79,7 +87,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add data/
+          git add data/ catalog/
           if git diff --cached --quiet; then
             echo "No changes to commit"
             echo "changed=false" >> $GITHUB_OUTPUT
