@@ -184,7 +184,7 @@ workflow.add_conditional_edges("agent", should_continue)
 | 关联项目 | 关联点 |
 |---------|--------|
 | [Hello-Agents](../ai-agents/hello-agents.md) | 中文版对应教程，Datawhale 出品 |
-| [GenAI_Agents](../ai-engineering/GenAI_Agents.md) | 英文教程横向最广，52 个 Notebook |
+| [GenAI_Agents](../ai-engineering/genai-agents.md) | 英文教程横向最广，52 个 Notebook |
 | [AI-Agents-for-Beginners](../ai-engineering/ai-agents-for-beginners.md) | 微软官方对应课程 |
 | [Smolagents (本仓库) ] | HF 自家，Code Agent 哲学源头 |
 | [Pi-Mono](../ai-engineering/pi-mono.md) | 同样支持 20+ LLM 统一接口 |
@@ -229,7 +229,7 @@ workflow.add_conditional_edges("agent", should_continue)
 ### 关联项目
 
 - [Hello-Agents](../ai-agents/hello-agents.md) — 中文版对应
-- [GenAI_Agents](../ai-engineering/GenAI_Agents.md) — 横向最广英文教程
+- [GenAI_Agents](../ai-engineering/genai-agents.md) — 横向最广英文教程
 - [AI-Agents-for-Beginners](../ai-engineering/ai-agents-for-beginners.md) — 微软对应课程
 - [Pi-Mono](../ai-engineering/pi-mono.md) — 同样多 LLM 统一接口
 - [smolagents (HF 官方) ] — Code Agent 哲学源头

@@ -232,3 +232,82 @@ def test_template_parses(in_repo_root):
         meta, body = catalog.parse_frontmatter(f.read())
     assert meta["name"] == "owner/repo"
     assert "## 一、项目基本信息" in body
+
+
+# ---------- check_profile_links ----------------------------------------------
+
+def test_check_profile_links_ok(tmp_path):
+    (tmp_path / "other.md").write_text("placeholder", encoding="utf-8")
+    body = "see [other](other.md) and [external](https://example.com) and [anchor](other.md#frag)"
+    errs = catalog.check_profile_links(str(tmp_path / "self.md"), body)
+    assert errs == []
+
+
+def test_check_profile_links_broken(tmp_path):
+    body = "see [missing](nope.md) for details"
+    errs = catalog.check_profile_links(str(tmp_path / "self.md"), body)
+    assert len(errs) == 1
+    assert "missing" in errs[0]
+    assert "nope.md" in errs[0]
+
+
+def test_check_profile_links_relative(tmp_path):
+    sub = tmp_path / "sub"
+    sub.mkdir()
+    target = tmp_path / "sibling.md"
+    target.write_text("placeholder", encoding="utf-8")
+    body = "see [sibling](../sibling.md)"
+    errs = catalog.check_profile_links(str(sub / "self.md"), body)
+    assert errs == []
+
+
+def test_check_profile_links_ignores_http(tmp_path):
+    body = "[ext](https://example.com/x.md) and [anchor](#section)"
+    errs = catalog.check_profile_links(str(tmp_path / "self.md"), body)
+    assert errs == []
+
+
+# ---------- lint_profile ------------------------------------------------------
+
+def test_lint_profile_clean():
+    body = (
+        "## 一、项目基本信息\n"
+        "## 二、技术栈与架构\n"
+        "## 三、核心功能特性\n"
+        "## 四、应用场景\n"
+        "## 五、个人评价\n"
+        "## 六、相关资源\n"
+        "Some stars here ~1,000（截至 2026-08）\n"
+    )
+    meta = {"summary": "x" * 60, "stars": 1000, "discovered": "2026-08-01", "updated": "2026-08-01"}
+    warns = catalog.lint_profile("catalog/ai-agents/x.md", body, meta)
+    assert warns == []
+
+
+def test_lint_profile_short_summary():
+    body = "## 项目基本信息\n## 技术栈\n## 核心功能\n## 应用场景\n## 个人评价\n## 相关资源"
+    meta = {"summary": "TODO", "stars": 0, "discovered": "2026-08-01", "updated": "2026-08-01"}
+    warns = catalog.lint_profile("catalog/ai-agents/x.md", body, meta)
+    assert any("summary too short" in w for w in warns)
+
+
+def test_lint_profile_missing_sections():
+    body = "## 项目基本信息\n## 技术栈\n## 核心功能\n"  # missing 3 sections
+    meta = {"summary": "x" * 60, "stars": 0, "discovered": "2026-08-01", "updated": "2026-08-01"}
+    warns = catalog.lint_profile("catalog/ai-agents/x.md", body, meta)
+    assert any("missing body anchors" in w for w in warns)
+
+
+def test_lint_profile_stale_updated():
+    body = "## 项目基本信息\n## 技术栈\n## 核心功能\n## 应用场景\n## 个人评价\n## 相关资源"
+    meta = {"summary": "x" * 60, "stars": 0, "discovered": "2025-01-01", "updated": "2025-01-01"}
+    warns = catalog.lint_profile("catalog/ai-agents/x.md", body, meta)
+    assert any("stale" in w.lower() or ">180 days" in w for w in warns)
+
+
+def test_lint_profile_legacy_exempt():
+    body = ""  # no sections at all
+    meta = {"summary": "x" * 60, "stars": 0, "discovered": "2025-01-01", "updated": "2025-01-01"}
+    # mind-philosophy domain is exempt from section check
+    warns = catalog.lint_profile("catalog/mind-philosophy/x.md", body, meta)
+    assert not any("missing body anchors" in w for w in warns)

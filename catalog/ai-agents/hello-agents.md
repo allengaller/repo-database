@@ -176,7 +176,7 @@ class HelloAgentsLLM:
 
 | 关联项目 | 关联点 |
 |---------|--------|
-| [GenAI_Agents](../ai-engineering/GenAI_Agents.md) | Hello-Agents 是中文版，GenAI_Agents 是英文版（都是教程路线） |
+| [GenAI_Agents](../ai-engineering/genai-agents.md) | Hello-Agents 是中文版，GenAI_Agents 是英文版（都是教程路线） |
 | [DeerFlow](../ai-agents/deer-flow.md) | 字节 SuperAgent harness，Hello-Agents 第 14 章 DeepResearch 类似 |
 | [Claude-Mem](../ai-engineering/claude-mem.md) | 持久记忆在 Hello-Agents 第 8 章有更体系化教学 |
 | [Pi-Mono](../ai-engineering/pi-mono.md) | Hello-Agents 偏 Python + OpenAI API，Pi-Mono 偏 TypeScript 全栈 |
@@ -221,7 +221,7 @@ class HelloAgentsLLM:
 
 ### 关联项目
 
-- [GenAI_Agents](../ai-engineering/GenAI_Agents.md) — 英文版 GenAI Agents 教程
+- [GenAI_Agents](../ai-engineering/genai-agents.md) — 英文版 GenAI Agents 教程
 - [DeerFlow](../ai-agents/deer-flow.md) — 字节 SuperAgent harness
 - [Claude-Mem](../ai-engineering/claude-mem.md) — Claude Code 持久记忆
 - [Pi-Mono](../ai-engineering/pi-mono.md) — TypeScript AI Agent 全栈

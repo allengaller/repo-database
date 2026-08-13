@@ -188,7 +188,7 @@ summary: 微软官方 AI Agent 初学者课程 — 10 节循序渐进，覆盖 A
 | 关联项目 | 关联点 |
 |---------|--------|
 | [Hello-Agents](../ai-agents/hello-agents.md) | 中文教程对应，Datawhale 出品 |
-| [GenAI_Agents](../ai-engineering/GenAI_Agents.md) | 英文教程横向最广 |
+| [GenAI_Agents](../ai-engineering/genai-agents.md) | 英文教程横向最广 |
 | [Agents-Course](../ai-engineering/agents-course.md) | HF 官方对应课程 |
 | [DeerFlow](../ai-agents/deer-flow.md) | 字节 SuperAgent 生产实践 |
 | [Semantic Kernel / AutoGen] | 本课重点技术栈 |
@@ -235,7 +235,7 @@ summary: 微软官方 AI Agent 初学者课程 — 10 节循序渐进，覆盖 A
 ### 关联项目
 
 - [Hello-Agents](../ai-agents/hello-agents.md) — 中文版对应
-- [GenAI_Agents](../ai-engineering/GenAI_Agents.md) — 横向最广英文教程
+- [GenAI_Agents](../ai-engineering/genai-agents.md) — 横向最广英文教程
 - [Agents-Course](../ai-engineering/agents-course.md) — HF 官方课程
 - [DeerFlow](../ai-agents/deer-flow.md) — 字节 SuperAgent 生产实践
 - [Pi-Mono](../ai-engineering/pi-mono.md) — TypeScript 跨语言版

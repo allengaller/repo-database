@@ -169,7 +169,7 @@ python agent.py
 | 关联项目 | 关联点 |
 |---------|--------|
 | [Hello-Agents](../ai-agents/hello-agents.md) | 中文版完整路径 |
-| [GenAI_Agents](../ai-engineering/GenAI_Agents.md) | 横向 Notebook 集合（更广） |
+| [GenAI_Agents](../ai-engineering/genai-agents.md) | 横向 Notebook 集合（更广） |
 | [Agents-Course](../ai-engineering/agents-course.md) | HF 官方课程 |
 | [DeerFlow](../ai-agents/deer-flow.md) | 字节 SuperAgent 真实生产 |
 | [OpenClaw](../ai-agents/openclaw.md) | 本地个人 Agent |
@@ -215,7 +215,7 @@ python agent.py
 ### 关联项目
 
 - [Hello-Agents](../ai-agents/hello-agents.md) — 中文版完整路径
-- [GenAI_Agents](../ai-engineering/GenAI_Agents.md) — 横向 Notebook 集合
+- [GenAI_Agents](../ai-engineering/genai-agents.md) — 横向 Notebook 集合
 - [Agents-Course](../ai-engineering/agents-course.md) — HF 官方课程
 - [DeerFlow](../ai-agents/deer-flow.md) — 字节 SuperAgent 真实生产
 - [OpenClaw](../ai-agents/openclaw.md) — 本地个人 Agent

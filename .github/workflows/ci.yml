@@ -42,3 +42,7 @@ jobs:
 
       - name: Validate catalog
         run: python scripts/catalog.py validate
+
+      - name: Lint catalog (soft checks)
+        # Soft warnings — does not fail CI but surfaces quality drift
+        run: python scripts/catalog.py lint || true

@@ -6,6 +6,7 @@ Usage:
     python scripts/catalog.py new <github-url> --domain <domain>   # draft a new profile
     python scripts/catalog.py index                                # rebuild catalog/INDEX.md
     python scripts/catalog.py validate                             # validate profiles + index freshness
+    python scripts/catalog.py lint                                 # soft checks: body sections + summary length
     python scripts/catalog.py refresh                              # update stars/forks/etc. from GitHub API
     GITHUB_TOKEN=xxx python scripts/catalog.py refresh
 """
@@ -14,7 +15,7 @@ import argparse
 import os
 import re
 import sys
-from datetime import date
+from datetime import date, datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from common import get_headers
@@ -320,19 +321,57 @@ def validate_profile(path, meta):
         expected = profile_filename(name.split("/", 1)[1])
         actual = os.path.basename(path)
         if actual != expected and not actual.startswith(expected[:-3] + "-"):
-            errors.append(f"filename '{actual}' does not match repo name (expected '{expected}')")
+            errors.append(
+                f"filename '{actual}' does not match repo name (expected '{expected}'; "
+                f"derived from repo via repo.lower().replace('_', '-'))"
+            )
     url = str(meta.get("url", ""))
     if name and url and url.rstrip("/") != f"https://github.com/{name}":
         errors.append(f"url '{url}' does not match name '{name}'")
     return errors
 
 
+# ------------------------------------------------------------------ link check
+
+# Markdown inline link: [label](target). Captures label + target; target may
+# contain balanced parens but we restrict to a single segment for simplicity.
+INLINE_LINK_RE = re.compile(r"\[([^\]\n]+)\]\(([^)\n]+\.md)(?:\)|#)")
+
+
+def check_profile_links(path, body, catalog_root=None):
+    """Return a list of broken internal Markdown link errors for one profile.
+
+    Only `.md` links are checked; `http(s)://` URLs and bare `#anchor` refs are
+    ignored. Paths are resolved relative to the file's directory.
+    """
+    errors = []
+    base = os.path.dirname(path)
+    for m in INLINE_LINK_RE.finditer(body):
+        label = m.group(1).strip()
+        target = m.group(2).strip()
+        if target.startswith(("http://", "https://", "#")):
+            continue
+        # Drop any trailing #anchor before resolving
+        target_path = target.split("#", 1)[0]
+        if not target_path:
+            continue
+        resolved = os.path.normpath(os.path.join(base, target_path))
+        if not os.path.exists(resolved):
+            errors.append(
+                f"broken link [{label}]({target}) → resolved to {resolved}"
+            )
+    return errors
+
+
 def cmd_validate(args):
     failed = False
     count = 0
-    for path, meta, _ in iter_profiles():
+    for path, meta, body in iter_profiles():
         count += 1
         for err in validate_profile(path, meta):
+            print(f"{path}: {err}")
+            failed = True
+        for err in check_profile_links(path, body):
             print(f"{path}: {err}")
             failed = True
 
@@ -350,6 +389,104 @@ def cmd_validate(args):
         print("Validation FAILED")
         return 1
     print(f"Validation OK: {count} profiles")
+    return 0
+
+
+# --------------------------------------------------------------------- lint
+
+# Required semantic anchors (per README §四). Section *titles* vary across the
+# catalog ("核心功能特性" / "核心特性" / "关键能力" / "核心价值主张" etc.), so we
+# match on substring anchors instead of strict `## 项目基本信息` literal.
+#   * 项目基本信息 — always required
+#   * 技术栈 OR 架构 OR 架构分析
+#   * 核心功能 OR 核心特性 OR 功能特性 OR 关键能力 OR 核心价值
+#   * 应用场景 OR 场景
+#   * 个人评价 OR 优势与不足 OR 评价
+#   * 相关资源 OR 资源链接
+# Legacy profiles (`mind-philosophy/*`, `ai-agents/yogacara-agent.md`) are
+# exempt; the check only flags missing anchors as warnings.
+REQUIRED_ANCHORS = [
+    ["项目基本信息"],
+    ["技术栈", "架构"],
+    ["核心功能", "核心特性", "功能特性", "关键能力", "核心价值", "核心能力"],
+    ["应用场景", "场景"],
+    ["个人评价", "评价"],
+    ["相关资源", "资源"],
+]
+LEGACY_EXEMPT = {"mind-philosophy", "ai-agents/yogacara-agent.md"}
+
+
+def _has_anchor(body, anchor_options):
+    return any(opt in body for opt in anchor_options)
+
+
+def lint_profile(path, body, meta):
+    """Return a list of soft warnings for one profile.
+
+    These do NOT block CI but flag quality regressions:
+      * missing six-section structure (legacy domains exempt)
+      * summary shorter than 30 chars (probably placeholder)
+      * star count present but no fetch-date stamp in body
+      * updated == discovered AND discovered > 180 days ago (stale?)
+    """
+    warnings = []
+    # 1. Semantic section anchors
+    domain_dir = os.path.basename(os.path.dirname(path))
+    rel = os.path.relpath(path, CATALOG_DIR)
+    if rel not in LEGACY_EXEMPT and domain_dir not in LEGACY_EXEMPT:
+        missing = [
+            group[0]
+            for group in REQUIRED_ANCHORS
+            if not _has_anchor(body, group)
+        ]
+        if missing:
+            warnings.append(
+                f"missing body anchors: {', '.join(missing)} "
+                "(README §四 six-section structure)"
+            )
+    # 2. Summary length
+    summary = (meta.get("summary") or "").strip()
+    if len(summary) < 30:
+        warnings.append(
+            f"summary too short ({len(summary)} chars); should explain 'what + why'"
+        )
+    # 3. Star number with fetch date (only if stars > 0)
+    stars = meta.get("stars", 0)
+    if isinstance(stars, int) and stars > 0:
+        if "（截至" not in body and "(as of" not in body:
+            warnings.append(
+                "star count lacks fetch-date stamp (use '~23,000（截至 2026-08）' format)"
+            )
+    # 4. Stale updated == discovered
+    discovered = str(meta.get("discovered", ""))
+    updated = str(meta.get("updated", ""))
+    if discovered and updated and discovered == updated:
+        try:
+            d = datetime.strptime(discovered, "%Y-%m-%d")
+            today = date.today()
+            if (today - d.date()).days > 180:
+                warnings.append(
+                    f"updated == discovered ({discovered}) for >180 days; "
+                    "consider running refresh or hand-editing 'updated'"
+                )
+        except ValueError:
+            pass
+    return warnings
+
+
+def cmd_lint(args):
+    """Run soft (non-blocking) checks across all profiles."""
+    warn_count = 0
+    profile_count = 0
+    for path, meta, body in iter_profiles():
+        profile_count += 1
+        for w in lint_profile(path, body, meta):
+            print(f"{path}: {w}")
+            warn_count += 1
+    if warn_count:
+        print(f"Lint: {warn_count} warnings across {profile_count} profiles")
+        return 0  # warnings don't fail the command
+    print(f"Lint OK: {profile_count} profiles, no warnings")
     return 0
 
 
@@ -406,6 +543,13 @@ def main():
 
     p_validate = sub.add_parser("validate", help="validate profiles and index freshness")
     p_validate.set_defaults(func=cmd_validate)
+
+    p_lint = sub.add_parser(
+        "lint",
+        help="soft checks (missing sections, short summary, stale updated); "
+        "does not block CI",
+    )
+    p_lint.set_defaults(func=cmd_lint)
 
     p_refresh = sub.add_parser("refresh", help="update stars/forks from GitHub API")
     p_refresh.set_defaults(func=cmd_refresh)

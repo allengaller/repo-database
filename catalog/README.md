@@ -118,6 +118,7 @@ python scripts/catalog.py new https://github.com/owner/repo --domain ai-agents
 # 3. 重建索引 + 校验
 python scripts/catalog.py index
 python scripts/catalog.py validate
+python scripts/catalog.py lint       # 软告警：缺段 / summary 过短 / star 无时间戳 / 数据陈旧；不阻塞 CI
 ```
 
 发现来源建议：`python scripts/discover_repos.py` 增量搜索 → 审阅 `data/discoveries.jsonl` → 值得深挖的建档。

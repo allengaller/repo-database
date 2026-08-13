@@ -187,7 +187,7 @@ result = crew.kickoff()
 | 关联项目 | 关联点 |
 |---------|--------|
 | [Hello-Agents](../ai-agents/hello-agents.md) | 中文版完整路径 |
-| [GenAI_Agents](../ai-engineering/GenAI_Agents.md) | 横向 Notebook 集合 |
+| [GenAI_Agents](../ai-engineering/genai-agents.md) | 横向 Notebook 集合 |
 | [Agents-Course](../ai-engineering/agents-course.md) | HF 官方对应（同样多框架） |
 | [AI-Agents-for-Beginners](../ai-engineering/ai-agents-for-beginners.md) | 微软官方对应 |
 | [DeerFlow](../ai-agents/deer-flow.md) | 真实生产 Agent |
@@ -233,7 +233,7 @@ result = crew.kickoff()
 ### 关联项目
 
 - [Hello-Agents](../ai-agents/hello-agents.md) — 中文版完整路径
-- [GenAI_Agents](../ai-engineering/GenAI_Agents.md) — 横向 Notebook 集合
+- [GenAI_Agents](../ai-engineering/genai-agents.md) — 横向 Notebook 集合
 - [Agents-Course](../ai-engineering/agents-course.md) — HF 官方对应
 - [AI-Agents-for-Beginners](../ai-engineering/ai-agents-for-beginners.md) — 微软官方对应
 - [DeerFlow](../ai-agents/deer-flow.md) — 真实生产 Agent
