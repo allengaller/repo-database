@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 3
 status: active
 tags: [boris-style, agent-orchestrator, tui, headless-claude, gated-pipeline, software-delivery, supervisor-agent]
+lineage: original
 summary: Boris 风格的 agentic 编排 TUI — 监督 headless Claude Code agent 跑软件交付 gated pipeline；针对任意代码仓库，~485 stars，"agent 督导员"概念的工程实现
 ---
 

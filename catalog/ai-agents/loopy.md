@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 3
 status: active
 tags: [agent-loop, ai-loop, loop-library, installable-skill, agent-harness, reusable-patterns]
+lineage: oh-my-codex
 summary: 实用 AI-agent loops 库 + 可安装 skill —— 把"AI-agent loop"作为可复用代码模块提供给开发者，~2.2k stars，"AI agent loop"领域的入门到实战工具
 ---
 

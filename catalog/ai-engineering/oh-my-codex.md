@@ -12,6 +12,7 @@ updated: 2026-08-04
 rating: 4
 status: active
 tags: [codex-cli, codex-enhancement, omx, agentic-workflow, multi-agent, tmux, worktree, deep-interview, ralplan, ultragoal]
+lineage: oh-my-zsh
 summary: Codex CLI 之上的"工作流引擎" — OmX（Oh My codeX），通过 $deep-interview / $ralplan / $ultragoal / $team / $ralph 把 Codex 升级为有记忆/会规划/可协作的工程化 AI 团队，~17k stars
 ---
 

@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 3
 status: active
 tags: [desktop-workspace, claude-code, multi-agent, git-worktree, skill-marketplace, agent-harness, local-first]
+lineage: anthropics/claude-code
 summary: 本地优先的桌面 agent 工作空间 — 多 agent 会话 + Git worktree + skill 市场 + 聊天 App 接入（微信/Telegram/WhatsApp），~14k stars，Claude Code "本地可运行 + 多端可达"的复刻方案
 ---
 

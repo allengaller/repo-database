@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 4
 status: active
 tags: [coding-agent, terminal-agent, lsp, dap, rust, multi-provider, browser-control, agent-harness]
+lineage: oh-my-zsh
 summary: 终端编码 agent 的"重装版" — 55k 行 Rust 核心 + LSP/DAP 真实接入 + 32 工具 per-model loop + Python/Bun 长生命周期内核回呼 agent 工具，~23k stars，被 best-of 称为"harness 工程的典范"
 ---
 

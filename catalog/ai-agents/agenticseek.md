@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 4
 status: active
 tags: [deepseek-r1, local-agent, privacy-first, web-browsing, voice-frontend, file-management, autonomous]
+lineage: openclaw
 summary: 本地优先 DeepSeek-R1 个人 AI agent — 替代 Manus / OpenAI Operator，浏览器自主浏览 + 文件管理 + 语音前端，全本地推理保护隐私，~26.8k stars
 ---
 

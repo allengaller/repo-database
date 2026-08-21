@@ -274,7 +274,7 @@ Vipassana App 架构
     └── 持续激励
 ```
 
-### 与 repo-hoarder 项目的关联
+### 与 repo-database 项目的关联
 
 Vipassana App 已在心力教练研究阶段进行了深度分析（报告已迁移至 [hush.ai](https://github.com/peace-lab-global/hush.ai/blob/main/knowledge/mind-coach/repos/vipassana-app/REPORT.md)）。
 
@@ -324,9 +324,9 @@ Vipassana App 的核心创新是使用八角形 SVG 可视化内观冥想的"觉
 - 离线 PWA 模式可作为心力教练 App 的技术架构参考
 - 游戏化设计理念可用于心力教练训练营的激励机制
 
-### 与 repo-hoarder PWA 的技术对比
+### 与 repo-database PWA 的技术对比
 
-| 特性 | Vipassana App | repo-hoarder |
+| 特性 | Vipassana App | repo-database |
 |------|--------------|-------------|
 | 应用类型 | PWA | PWA |
 | 离线支持 | 完全离线 | Service Worker 缓存 |
@@ -379,7 +379,7 @@ Vipassana App 的核心创新是使用八角形 SVG 可视化内观冥想的"觉
 
 - **vipassana_android**：另一个内观冥想 App（Android 原生）
 - **vasana-poc**：心力教练项目的熏习机制 PoC，受 Vipassana App 启发
-- **repo-hoarder**：本项目（repo-hoarder）也是 PWA，技术栈有相似性
+- **repo-database**：本项目（repo-database）也是 PWA，技术栈有相似性
 
 ---
 

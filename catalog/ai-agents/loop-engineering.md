@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 3
 status: active
 tags: [agent-loop, loop-engineering, prompt-engineering, rag, conversational-ai, starters, patterns]
+lineage: original
 summary: "Loop Engineering" 概念的源头项目 — 实用 AI agent loop 模式、starter 模板与 CLI 工具集，把"loop engineering"做成可复用的工程实践，~4.5k stars
 ---
 

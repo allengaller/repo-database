@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 4
 status: active
 tags: [self-evolving, gep-protocol, agent-evolution, meta-agent, audit, plugin-cursor, plugin-claude-code]
+lineage: DSPy
 summary: GEP 协议驱动的 AI Agent 自进化引擎 — 元 agent 审计 + Git 演进 + 可审计的进化轨迹，覆盖 Claude Code / Codex CLI / Cursor / ChatGPT，~9k stars，"Agent 自进化"赛道代表
 ---
 

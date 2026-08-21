@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 3
 status: active
 tags: [agent-os, autonomous, rust, knowledge-graph, scheduled-tasks, hands, channels, llm-providers]
+lineage: openmultiagent
 summary: Rust 写的开源 Agent Operating System — 7 个自主 "Hands" 7×24 跑知识图谱 / 监控 / 社交 / 线索管理；支持 40+ 渠道 + 27 家 LLM provider，~18.1k stars，"Agent OS" 概念的代表项目
 ---
 

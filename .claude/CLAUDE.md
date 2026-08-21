@@ -1,4 +1,4 @@
-# GitHub Treasure Repo (repo-hoarder)
+# GitHub Treasure Repo (repo-database)
 
 ## 项目概述
 
@@ -30,7 +30,7 @@ freshness 按 `fetched_at` 指数衰减，半衰期 120 天，下限 0.05。
 
 ## catalog/ 约定
 
-- 一级目录 = 技术领域（`ai-agents` / `ai-engineering` / `ai-mental-health` / `creative-coding` / `culture-arts` / `mind-philosophy` / `mindfulness-apps`），注册于 `catalog.py` 的 `DOMAINS`
+- 一级目录 = 技术领域（`ai-agents` / `ai-engineering` / `ai-mental-health` / `creative-coding` / `culture-arts` / `fullstack-arch` / `maas-platform` / `mind-philosophy` / `mindfulness-apps`），注册于 `catalog.py` 的 `DOMAINS`
 - 文件名 = 小写仓库名（`_` 转 `-`）+ `.md`
 - frontmatter 为简易 YAML 子集（str / int / 行内 list），必填字段见 `catalog.py` 的 `REQUIRED_FIELDS`
 - `catalog/INDEX.md` 由 `catalog.py index` 生成（幂等、无时间戳），勿手改

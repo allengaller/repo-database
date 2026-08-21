@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 4
 status: active
 tags: [awesome-list, agent-harness, ranking, radar, evaluation, periodic-update]
+lineage: original
 summary: Agent Harness 方向的 awesome-list 与季度榜单 — 按 stars/contributors/维护活跃度三维评分，覆盖 Claude Code/Cursor/Aider/Cline/Oh-My 等主流 harness，~1.5k stars，"Agent Harness 圈的事实雷达"
 ---
 

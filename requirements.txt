@@ -1,4 +1,4 @@
-# Runtime + test dependencies for repo-hoarder.
+# Runtime + test dependencies for repo-database.
 # For fully-reproducible installs use `uv sync` together with uv.lock,
 # which pins every transitive dependency (urllib3, charset-normalizer, ...).
 # `pip install -r requirements.txt` still works as a fallback.

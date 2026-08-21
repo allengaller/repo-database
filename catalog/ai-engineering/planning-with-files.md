@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 4
 status: active
 tags: [planning-skill, claude-code, persistent-memory, markdown-files, manus-style, session-recovery, agent-skills]
+lineage: original
 summary: Manus 风格的文件式持久规划技能 — 把 task_plan.md / findings.md / progress.md 当作 agent 的"工作记忆"，跨 /clear / compaction 不丢任务状态，~26k stars，Claude Code 上最受欢迎的单 skill 之一
 ---
 

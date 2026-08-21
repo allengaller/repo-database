@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 4
 status: active
 tags: [kanban, fleet-manager, coding-agent, claude-code, codex, multi-agent, parallel-execution]
+lineage: original
 summary: 把"编码 agent 当队员管理"的 Kanban —— 同时调度 Claude Code / Codex / Gemini CLI / AMP 多 agent 并行跑多个 ticket，~27.7k stars，"AI 工程团队的看板"
 ---
 

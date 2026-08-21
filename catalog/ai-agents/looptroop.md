@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 3
 status: active
 tags: [agent-loop, llm-council, ralph-loop, opencode-worktree, config-pipeline, agent-orchestration]
+lineage: anthropics/claude-code
 summary: 三段式配置层 —— LLM council 规划 → Ralph loop 迭代精炼 → OpenCode worktree 交付；OpenCode 之上跑"集体决策 + 持续打磨"的 agent pipeline，~116 stars
 ---
 

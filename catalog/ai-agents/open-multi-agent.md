@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 3
 status: active
 tags: [multi-agent, langgraph, role-based, orchestration, chinese-ecosystem, modular]
+lineage: All-Hands-AI/OpenHands
 summary: 中文社区出品的开源多 agent 框架 — 基于 LangGraph 的角色化多 agent 编排，可拆装模块 + 中文文档友好，~6.7k stars，中文多 agent 入门首选之一
 ---
 

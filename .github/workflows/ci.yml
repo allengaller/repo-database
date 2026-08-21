@@ -31,18 +31,34 @@ jobs:
           fi
 
       - name: Run tests
-        run: pytest tests/ -v --tb=short
+        # uv sync installs into .venv; bare `pytest` is not on PATH there.
+        # Use `uv run` inside the venv, plain `pytest` on the pip fallback.
+        run: |
+          if command -v uv >/dev/null 2>&1 && [ -f uv.lock ]; then
+            uv run pytest tests/ -v --tb=short
+          else
+            pytest tests/ -v --tb=short
+          fi
 
       - name: Syntax check scripts
         run: |
-          python -c "import ast; ast.parse(open('scripts/scrape.py').read())"
-          python -c "import ast; ast.parse(open('scripts/update_monthly.py').read())"
-          python -c "import ast; ast.parse(open('scripts/catalog.py').read())"
-          python -c "import ast; ast.parse(open('scripts/discover_repos.py').read())"
+          for f in scrape.py update_monthly.py catalog.py discover_repos.py; do
+            python -c "import ast; ast.parse(open('scripts/$f').read())"
+          done
 
       - name: Validate catalog
-        run: python scripts/catalog.py validate
+        run: |
+          if command -v uv >/dev/null 2>&1 && [ -f uv.lock ]; then
+            uv run python scripts/catalog.py validate
+          else
+            python scripts/catalog.py validate
+          fi
 
       - name: Lint catalog (soft checks)
         # Soft warnings — does not fail CI but surfaces quality drift
-        run: python scripts/catalog.py lint || true
+        run: |
+          if command -v uv >/dev/null 2>&1 && [ -f uv.lock ]; then
+            uv run python scripts/catalog.py lint
+          else
+            python scripts/catalog.py lint
+          fi || true

@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 5
 status: active
 tags: [coding-agent, terminal-agent, multi-provider, mcp, plugin, tui, agent-harness]
+lineage: anthropics/claude-code
 summary: 开源终端编码 agent 的事实标准 — 195k+ stars（截至 2026-08），原 sst/opencode 转让给 anomalyco 的多 provider tool-call loop，插件 + MCP + TUI 全栈，被视作 Claude Code / Codex 的开源对应物
 ---
 

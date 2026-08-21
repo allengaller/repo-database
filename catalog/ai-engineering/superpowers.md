@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 5
 status: active
 tags: [agent-skills, harness, claude-code, codex, opencode, gemini-cli, tdd, brainstorming, systematic-debugging, slash-commands]
+lineage: anthropics/skills
 summary: 跨 13+ 编码 agent harness 的"方法论技能包" — 把 brainstorming / TDD / systematic-debugging / code-review 等软件工程最佳实践装成可被任何 harness 加载的 SKILL.md，~28k stars，harness 工程的标杆方法论库
 ---
 

@@ -1,251 +1,255 @@
-# GitHub Treasure Repo
+# repo-database
 
-[![CI](https://github.com/allengaller/repo-hoarder/actions/workflows/ci.yml/badge.svg)](https://github.com/allengaller/repo-hoarder/actions/workflows/ci.yml)
-[![Monthly Scrape](https://github.com/allengaller/repo-hoarder/actions/workflows/monthly-scrape.yml/badge.svg)](https://github.com/allengaller/repo-hoarder/actions/workflows/monthly-scrape.yml)
-[![Monthly Update](https://github.com/allengaller/repo-hoarder/actions/workflows/monthly-update.yml/badge.svg)](https://github.com/allengaller/repo-hoarder/actions/workflows/monthly-update.yml)
-[![Pages](https://github.com/allengaller/repo-hoarder/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/allengaller/repo-hoarder/actions/workflows/deploy-pages.yml)
-[![Live](https://img.shields.io/badge/Live-GitHub_Pages-blue)](https://allengaller.github.io/repo-hoarder/)
+[![CI](https://github.com/allengaller/repo-database/actions/workflows/ci.yml/badge.svg)](https://github.com/allengaller/repo-database/actions/workflows/ci.yml)
+[![Monthly Scrape](https://github.com/allengaller/repo-database/actions/workflows/monthly-scrape.yml/badge.svg)](https://github.com/allengaller/repo-database/actions/workflows/monthly-scrape.yml)
+[![Monthly Update](https://github.com/allengaller/repo-database/actions/workflows/monthly-update.yml/badge.svg)](https://github.com/allengaller/repo-database/actions/workflows/monthly-update.yml)
+[![Profiles](https://img.shields.io/badge/catalog-104_profiles-brightgreen)](catalog/INDEX.md)
+[![License](https://img.shields.io/badge/license-MIT-blue)](#许可协议)
 
-全自动聚合 GitHub 优质项目的开源工具，整合 Awesome 榜单 + GitHub API + Hacker News + DEV.to 多源数据，提供智能筛选、灵感探索、收藏管理的一站式体验。
+[English](README.md) · [档案索引](catalog/INDEX.md) · [报告问题](https://github.com/allengaller/repo-database/issues)
 
-除自动化数据集外，本仓库还维护一座**人工策展知识库**（[`catalog/`](catalog/README.md)）—— 每个重要仓库一篇独立 Markdown 档案（frontmatter 元数据 + 深度分析），按技术领域分类，由 `scripts/catalog.py` 与月度 CI 自动保鲜。
+一座 GitHub 仓库知识库，由两个互补的部分组成：
 
-[English](README.md) · [在线访问](https://allengaller.github.io/repo-hoarder/) · [报告问题](https://github.com/allengaller/repo-hoarder/issues)
+1. **自动化聚合** —— 多源爬虫（Awesome 榜单、GitHub Search API、Hacker News、DEV.to）产出数据集，配一个零构建的 Web UI，提供筛选、灵感探索与收藏管理。
+2. **人工策展** —— [`catalog/`](catalog/README.md)，当前 **104 篇 Markdown 档案**，覆盖 9 个技术领域。一仓一档：frontmatter 元数据 + 六段式深度分析（技术栈、核心特性、应用场景、个人评价、相关资源），由 `scripts/catalog.py` 管理并在 CI 中强制校验。
 
----
-
-## ✨ 核心特性
-
-### 🎯 智能发现
-- **灵感模式** - 全屏沉浸式探索，左右滑动或键盘导航浏览项目
-- **智能推荐** - 基于收藏偏好自动推荐相似优质项目
-- **随机宝藏** - 随机发现意想不到的优质项目
-- **飙升指数** - 发现今日增长最快的新星项目
-
-### 🔍 强大筛选
-- **多维度筛选** - 语言 / Stars / Forks / 评分范围
-- **实时搜索** - 输入即显示匹配结果
-- **分享筛选链接** - 一键分享当前筛选条件
-- **保存预设** - 自定义筛选条件保存与加载
-
-### 💾 收藏管理
-- **本地持久化** - localStorage 存储，永不丢失
-- **批量操作** - 批量收藏、批量导出
-- **项目对比** - 任意两个项目并排对比
-- **JSON 导出** - 收藏数据一键导出
-
-### 🎨 优质体验
-- **暗夜/白天模式** - 一键切换，自动记忆
-- **中英文切换** - 中文/English 随时切换
-- **PWA 离线支持** - 添加到主屏幕，离线访问
-- **键盘快捷键** - 全程键盘操作，高效导航
+策展部分是本仓库的重心。爬虫是入口漏斗，档案库是经过评审后真正留下来的东西。
 
 ---
 
-## 🚀 快速开始
+## 仓库结构
 
-### 在线访问（推荐）
+```
+repo-database/
+├── scripts/
+│   ├── scrape.py              # 多源聚合爬虫 -> data/repos.json
+│   ├── update_monthly.py      # 月度增量抓取 + 报告
+│   ├── discover_repos.py      # 基于关键词的发现（gh CLI）-> discoveries.jsonl
+│   ├── catalog.py             # 档案库管理器（new/index/validate/lint/refresh）
+│   ├── backfill_lineage.py    # 一次性脚本：回填 lineage 字段
+│   └── common.py              # 共享的 HTTP/session 辅助函数
+├── data/
+│   ├── repos.json             # 聚合数据集（随仓库分发的是 28 条种子数据）
+│   ├── discoveries.jsonl      # 发现收件箱 —— 423 行候选，仅追加
+│   └── monthly_report_*.md    # 自动生成的月度报告
+├── catalog/                   # 策展档案（知识库主体）
+│   ├── README.md              # 分类法、命名规范、工作流、档案规格
+│   ├── INDEX.md               # 自动生成（请勿手工编辑）
+│   ├── _template.md           # 档案模板
+│   ├── _lineage/              # 范式谱系档案（5 个范式）
+│   └── <domain>/<repo>.md     # 9 个领域下共 104 篇档案
+├── research/                  # 专题调研（mind-coach、psychology-projects）
+├── web/                       # 纯 HTML/CSS/JS 前端 + PWA Service Worker
+├── tests/                     # 100 个 pytest 用例（scripts / catalog / frontend）
+├── docs/                      # 归档的规划与评审文档
+├── .github/workflows/         # ci · deploy-pages · monthly-scrape · monthly-update
+├── pyproject.toml             # 依赖 + ruff/pytest 配置
+└── uv.lock                    # 锁定全部传递依赖，保证可复现安装
+```
 
-👉 **https://allengaller.github.io/repo-hoarder/**
+### 数据流
 
-> 数据由 GitHub Actions 每日自动更新
+```
+discover_repos.py ──► data/discoveries.jsonl ──► 人工 triage ──► catalog/<domain>/*.md
+                                                                      │
+scrape.py ─────────► data/repos.json ─────────► web/（浏览与筛选）      └──► catalog/INDEX.md
+```
 
-### 本地运行
+`data/repos.json` 是量化的原始水流（按得分排序、机器生成）；`catalog/` 是质化沉淀层（手工撰写、评审准入）。两者相互独立 —— 出现在其中之一并不代表会进入另一个。
+
+---
+
+## 档案库
+
+104 篇档案，9 个领域：
+
+| 领域 | 篇数 | 范围 |
+|---|---:|---|
+| `ai-engineering` | 33 | LLM 工程、推理、RAG、编码 agent/CLI |
+| `ai-agents` | 28 | Agent 框架、harness、多 agent 编排 |
+| `fullstack-arch` | 10 | 系统设计、云原生参考架构与 IaC、SRE 与可观测 |
+| `maas-platform` | 10 | 推理引擎、模型网关、K8s 算力调度、LLMOps |
+| `ai-mental-health` | 7 | AI × 心理/咨询方向的研究与数据集 |
+| `creative-coding` | 5 | 生成艺术、创意编程工具 |
+| `culture-arts` | 5 | 数字人文、文化遗产开放数据 |
+| `mind-philosophy` | 4 | 心智哲学 / 唯识学 × 计算实现 |
+| `mindfulness-apps` | 2 | 冥想与正念应用 |
+
+每篇档案都带必填 frontmatter（`name, url, domain, type, discovered, updated, rating, summary`），以及可选的 `stars / forks / license / languages / status / tags / lineage`。`validate` 强制校验字段规格、文件名规范，并检查正文内部 Markdown 链接是否全部可达；`lint` 输出软性质量告警（缺段落、summary 过短、Star 数缺少截止日期等）。
+
+`catalog/_lineage/` 追踪**范式谱系** —— 已归档 5 个范式（CLI 流式 diff 编辑器、多 agent 编排、agent harness 配置、oh-my-zsh 家族、prompt 演化框架），记录其源头仓库与衍生品，并与各档案 frontmatter 的 `lineage` 字段互相索引。
+
+完整分类法、命名规范与档案规格见 [`catalog/README.md`](catalog/README.md)。
+
+---
+
+## 快速开始
 
 ```bash
-# 克隆项目
-git clone https://github.com/allengaller/repo-hoarder.git
-cd repo-hoarder
+git clone https://github.com/allengaller/repo-database.git
+cd repo-database
 
-# 安装依赖
-pip install -r requirements.txt
+# 安装依赖（uv 会读取 uv.lock，保证可复现）
+uv sync --extra dev
+# 或：pip install -r requirements.txt
 
-# 抓取最新数据
-python3 scripts/scrape.py
-
-# 启动本地服务
+# 用内置种子数据直接浏览 UI —— 无需联网、无需 token
 cd web && python3 -m http.server 8000
 # 访问 http://localhost:8000
 ```
 
-### 数据更新
+> `data/repos.json` 随仓库分发的是一份 **28 条精选种子数据**，让 `web/` 开箱即可离线运行。
+> 执行 `scripts/scrape.py`（或月度工作流）会用真实抓取结果覆盖它，量级约 1000+ 仓库。
+
+---
+
+## 使用方式
+
+### 更新数据集
 
 ```bash
-# 抓取全部数据源
+# 全量抓取四个数据源（约 5 分钟；建议设置 GITHUB_TOKEN 以获得完整覆盖）
 python3 scripts/scrape.py
 
-# 增量更新当月新项目
-python3 scripts/update_monthly.py --year 2026 --month 5 --report
+# 单月增量抓取 + 生成 Markdown 报告
+python3 scripts/update_monthly.py --year 2026 --month 8 --report
 ```
 
-### 档案库维护
+### 维护档案库
 
 ```bash
-# 发现候选仓库（需 gh CLI）→ data/discoveries.jsonl
+# 1. 发现候选仓库（需已登录的 gh CLI）-> data/discoveries.jsonl
 python3 scripts/discover_repos.py
 
-# 为值得沉淀的仓库生成档案草稿
-python3 scripts/catalog.py new https://github.com/owner/repo --domain ai-agents
+# 2. 为值得沉淀的仓库生成档案草稿
+python3 scripts/catalog.py new https://github.com/owner/repo --domain maas-platform
 
-# 重建索引 + 校验全部档案
-python3 scripts/catalog.py index
-python3 scripts/catalog.py validate
+# 3. 手工补全六段正文，然后重建与校验
+python3 scripts/catalog.py index      # 重新生成 catalog/INDEX.md
+python3 scripts/catalog.py validate   # 硬门禁：字段规格、文件名、断链
+python3 scripts/catalog.py lint       # 软告警：质量漂移
 
-# 从 GitHub API 刷新 stars/forks/许可（月度 CI 也会自动执行）
+# 从 GitHub API 刷新 stars/forks/许可（月度 CI 也会执行）
 python3 scripts/catalog.py refresh
 ```
 
-分类法、命名规范与档案模板见 [`catalog/README.md`](catalog/README.md)。
+`validate` 违规即非零退出并在 CI 中拦截；`lint` 始终返回 0，仅作提示。
+
+### 运行测试
+
+```bash
+uv run pytest tests/ -v          # 100 个用例
+# 或：pytest tests/ -v
+```
+
+`tests/test_scripts.py` 用 `responses` 拦截 HTTP，整套测试可完全离线运行。
 
 ---
 
-## ⌨️ 键盘快捷键
+## Web 界面
 
-### 全局快捷键
+### 智能发现
+- **灵感模式** —— 全屏沉浸式卡片浏览，支持滑动/键盘导航、自动播放、撤销重做
+- **智能推荐** —— 依据收藏项目的语言与关键词推荐相似仓库
+- **随机宝藏** —— 随机翻出平时不会浮现的优质项目
+- **飙升指数** —— 按 `today_stars / stars` 排序，识别增长最快的新星
+
+### 筛选与搜索
+多维筛选（语言 / Stars / Forks / 评分）· 输入即搜 · 筛选条件同步到 URL 可分享 · 自定义预设保存
+
+### 收藏管理
+`localStorage` 持久化 · 批量收藏与导出 · 双项目并排对比 · JSON 导出
+
+### 体验细节
+暗色/亮色主题（自动记忆）· 中英文切换 · PWA 离线兜底 · 全键盘操作
+
+### 键盘快捷键
 
 | 快捷键 | 功能 |
-|--------|------|
+|---|---|
 | `/` | 聚焦搜索框 |
-| `T` | 切换主题 |
-| `B` | 切换书签视图 |
+| `T` | 切换主题（灵感模式下为分享到 X） |
+| `B` | 切换收藏视图 |
 | `L` | 切换语言 |
 | `?` | 显示帮助 |
-
-### 列表导航
-
-| 快捷键 | 功能 |
-|--------|------|
 | `↑` / `↓` | 上/下选择项目 |
-| `Enter` | 打开项目详情 |
-| `Space` | 收藏/取消收藏 |
+| `Enter` | 打开详情 |
+| `Space` | 收藏 / 取消收藏 |
 | `C` | 进入对比模式 |
-
-### 灵感模式
-
-| 快捷键 | 功能 |
-|--------|------|
-| `←` / `→` | 上/下一个项目 |
-| `Space` | 收藏 |
-| `Enter` | 在 GitHub 打开 |
-| `F` | 翻转卡片 |
-| `T` | 分享到 X |
+| `←` / `→` | 灵感模式上/下一个 |
 | `P` | 自动播放 |
-| `Home` / `End` | 跳到首/末项目 |
-| `U` | 撤销 |
-| `R` | 重做 |
-| `Esc` | 关闭 |
+| `F` | 翻转卡片 |
+| `U` / `R` | 撤销 / 重做 |
+| `Home` / `End` | 跳到首/末项 |
+| `Esc` | 关闭浮层 |
 
 ---
 
-## 📊 数据来源
+## 数据来源与评分
 
-| 来源 | 描述 | 数据量 |
-|------|------|--------|
-| **Awesome Lists** | vinta/awesome-python, avelino/awesome-go 等经典列表 | 8+ 列表 |
-| **GitHub API** | 2026 年创建的热门项目搜索 | 1000+ 项目 |
-| **Hacker News** | HN 热帖中的 GitHub 项目 | 实时抓取 |
-| **DEV.to** | DEV.to 热文中的开源项目 | 实时抓取 |
-
----
-
-## 🏆 评分算法
+| 来源 | 贡献内容 |
+|---|---|
+| **Awesome Lists** | vinta/awesome-python、avelino/awesome-go 等 8 个经典列表 |
+| **GitHub Search API** | 覆盖 5 个维度的近期活跃度查询 |
+| **Hacker News** | HN 热帖中指向 GitHub 的项目 |
+| **DEV.to** | 从热门文章中提取的开源项目 |
 
 ```
-综合得分 = Stars + Forks + (Fork数/Stars数 × 1000) + 今日增长 × 10
+综合得分 = stars
+        + forks
+        + (forks / stars) × 1000   # 社区参与度
+        + today_stars × 10          # 增长势头
+        + commit_activity × 2       # 近 4 周提交数（新鲜度）
 ```
 
-评分综合考虑项目规模（Stars）、社区活跃度（Fork 率）、增长势头（今日增长），筛选出真正有价值的宝藏项目。
+`today_stars` 是**估算值** —— GitHub Search API 不提供每日 star 增量，脚本依据 push/创建时间的新近程度推算。对排名靠前的趋势仓库，爬虫会额外查询 `stats/commit_activity`，用真实提交数据校准势头信号。
 
 ---
 
-## 🗂️ 项目结构
+## 自动化
 
-```
-repo-hoarder/
-├── scripts/
-│   ├── scrape.py           # 多源聚合爬虫
-│   └── update_monthly.py   # 月度增量更新
-├── tests/
-│   └── test_scripts.py     # pytest 单元测试（24 用例）
-├── data/
-│   ├── repos.json          # 抓取的数据
-│   └── monthly_report_*.md # 月度报告
-├── web/
-│   ├── index.html          # 主页面
-│   ├── styles.css          # 样式文件
-│   ├── app.js              # 前端逻辑
-│   ├── sw.js               # Service Worker (PWA)
-│   └── manifest.json       # PWA 清单
-├── docs/
-│   ├── FEATURE_PLAN.md     # 功能规划（历史）
-│   ├── FIX_REPORT.md       # 修复记录（历史）
-│   └── REVIEW.md           # 初始检查报告（历史）
-├── .github/
-│   └── workflows/
-│       ├── ci.yml              # PR/推送测试
-│       ├── deploy-pages.yml    # 部署到 GitHub Pages
-│       ├── monthly-scrape.yml  # 月度抓取
-│       └── monthly-update.yml  # 月度更新
-├── requirements.txt
-└── README.md / README.zh-CN.md
-```
+| 工作流 | 触发时机 | 行为 |
+|---|---|---|
+| `ci.yml` | push / PR 到 `main` | pytest → 语法检查 → `catalog.py validate` → `catalog.py lint`（软） |
+| `monthly-scrape.yml` | 每月 1 日 00:00 UTC | 全量多源抓取，提交 `data/repos.json` |
+| `monthly-update.yml` | 每月 1 日 06:00 UTC | 月度增量抓取 + `catalog.py refresh` + `index`，提交结果 |
+| `deploy-pages.yml` | push 到 `main` | 将 `web/` 发布到 GitHub Pages |
+
+抓取周期是**每月**，不是每日。本仓库未启用 GitHub Pages，因此没有在线 Demo —— 请本地运行，或在自己的 fork 上开启 Pages（见常见问题）。
 
 ---
 
-## 🎬 功能演示
-
-### 灵感模式
-全屏沉浸式探索，随机浏览优质项目，支持滑动、键盘导航、自动播放、撤销重做。
-
-### 项目对比
-选择任意两个项目并排对比，Stars、Forks、评分一目了然。
-
-### 智能推荐
-基于已收藏项目的语言和关键词，自动推荐相似优质项目。
-
-### 飙升指数
-按 `今日增长/Stars` 排序，发现增长最快的新星项目。
-
----
-
-## 🛠️ 技术栈
+## 技术栈
 
 | 层级 | 技术 |
-|------|------|
-| **爬虫** | Python 3 + requests |
-| **前端** | 纯 HTML/CSS/JS（零依赖） |
-| **离线** | Service Worker + PWA |
-| **CI/CD** | GitHub Actions |
-| **部署** | GitHub Pages |
+|---|---|
+| 爬虫 | Python 3.11+ · requests · BeautifulSoup |
+| 工程工具 | uv（锁定依赖）· pytest · ruff（行宽 120） |
+| 前端 | 纯 HTML/CSS/JS —— 零构建步骤 |
+| 离线 | Service Worker + PWA manifest |
+| CI/CD | GitHub Actions |
+| 部署 | GitHub Pages（需自行开启） |
 
 ---
 
-## 📈 数据统计
+## 常见问题
 
-当前 `repos.json` 收录：
+**页面提示「无法加载数据」？**
+请通过 HTTP 服务访问（`python3 -m http.server 8000`）。浏览器禁止 `file://` 协议下的 `fetch`。
 
-- **项目总数**: 1900+
-- **数据来源**: 4 个 (Awesome Lists, GitHub API, Hacker News, DEV.to)
-- **编程语言**: 15+ (Python, JavaScript, TypeScript, Go, Rust, Java, C++ 等)
-- **更新周期**: 每日自动更新
+**GitHub API 请求受限？**
+设置 `GITHUB_TOKEN` 环境变量，限额从 60/小时提升到 5000/小时。`discover_repos.py` 另需已登录的 `gh` CLI。
 
----
+**新档案跑 `catalog.py validate` 报错？**
+最常见是文件名：只取 **repo** 部分，小写并把 `_` 换成 `-`（因此 `Project-HAMi/HAMi` → `hami.md`）。其次是正文里的内部 Markdown 链接指向了尚未创建的档案。
 
-## 🐛 常见问题
-
-**Q: 页面显示"无法加载数据"？**
-> 请通过 HTTP 服务器访问（`python3 -m http.server 8000`），浏览器安全策略禁止 `file://` 协议下的 fetch 请求。
-
-**Q: GitHub API 请求受限？**
-> 爬虫脚本支持 `GITHUB_TOKEN` 环境变量，设置后可将请求限额从 60/hour 提升到 5000/hour。
-
-**Q: 如何部署到自己仓库？**
-> 1. Fork 本仓库
-> 2. 进入 Settings → Pages → Source 选择 GitHub Actions
-> 3. 推送代码后自动部署
+**想要一份在线版本？**
+1. Fork 本仓库
+2. Settings → Pages → Source 选择 **GitHub Actions**
+3. 推送到 `main`，`deploy-pages.yml` 会把 `web/` 发布到 `https://<user>.github.io/repo-database/`
 
 ---
 
-## 📄 License
+## 许可协议
 
 MIT

@@ -1,4 +1,4 @@
-"""Shared utilities for repo-hoarder scripts."""
+"""Shared utilities for repo-database scripts."""
 
 import math
 import os
@@ -22,7 +22,7 @@ LANGUAGES = [
 def get_headers():
     """Build request headers with optional GitHub token."""
     headers = {
-        "User-Agent": "Mozilla/5.0 (repo-hoarder)",
+        "User-Agent": "Mozilla/5.0 (repo-database)",
         "Accept": "application/vnd.github.v3+json",
     }
     if GITHUB_TOKEN:

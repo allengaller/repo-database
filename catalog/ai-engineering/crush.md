@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 4
 status: active
 tags: [terminal-agent, golang, tui, bubble-tea, charm, multi-provider, session-persistence, coding-agent]
+lineage: anthropics/claude-code
 summary: Charm 出品的终端编码 agent — 23k stars（截至 2026-08），Bubble Tea TUI + tool-call loop + 会话持久化，Go 单二进制部署，"glamourous agentic coding for all"
 ---
 

@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 5
 status: active
 tags: [agent-skills, anthropic, claude-code, claude-api, progressive-disclosure, skill-md, docx-pdf-pptx]
+lineage: original
 summary: Anthropic 官方 Agent Skills 仓库 — SKILL.md-based 文件夹（指令/脚本/资源）让 Claude 在 Claude Code / Claude.ai / API 上动态加载，~167k stars，2026 年 progressive-disclosure 技能包的事实标准
 ---
 

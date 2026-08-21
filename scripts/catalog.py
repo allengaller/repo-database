@@ -30,6 +30,8 @@ DOMAINS = [
     "ai-mental-health",
     "creative-coding",
     "culture-arts",
+    "fullstack-arch",
+    "maas-platform",
     "mind-philosophy",
     "mindfulness-apps",
 ]
@@ -57,6 +59,8 @@ DOMAIN_LABELS = {
     "ai-mental-health": "AI × 心理健康",
     "creative-coding": "创意编程 × 生成艺术",
     "culture-arts": "文化 × 数字人文",
+    "fullstack-arch": "全栈架构 × 系统设计",
+    "maas-platform": "MaaS 平台 × 模型服务",
     "mind-philosophy": "心智哲学 × 计算",
     "mindfulness-apps": "冥想/正念应用",
 }

@@ -52,6 +52,37 @@ QUERIES = [
     "music generation AI",
     "computational creativity",
     "therapy chatbot LLM",
+    # MaaS SA：推理引擎与部署
+    "LLM inference engine",
+    "LLM serving",
+    "model deployment kubernetes",
+    # MaaS SA：模型网关与多模型接入
+    "LLM gateway",
+    "LLM proxy multi provider",
+    "AI api gateway",
+    # MaaS SA：K8s 算力调度与 AI Stack
+    "kubernetes GPU scheduling",
+    "kubernetes AI platform",
+    "MLOps kubernetes operator",
+    # MaaS SA：LLMOps 与可观测
+    "LLM observability",
+    "LLM evaluation framework",
+    "prompt management platform",
+    # 全栈 SA：系统设计与架构知识库
+    "system design",
+    "software architecture guide",
+    "scalability awesome",
+    # 全栈 SA：云原生参考架构与 IaC
+    "terraform modules",
+    "cloud native reference architecture",
+    "kubernetes production best practices",
+    # 全栈 SA：全栈应用脚手架
+    "fullstack starter template",
+    "saas boilerplate",
+    # 全栈 SA：可观测性与 SRE 工程
+    "opentelemetry collector",
+    "SRE toolkit",
+    "chaos engineering",
 ]
 
 

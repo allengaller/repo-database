@@ -1,5 +1,5 @@
 [project]
-name = "repo-hoarder"
+name = "repo-database"
 version = "1.0.0"
 description = "Automated GitHub treasure repo aggregator"
 requires-python = ">=3.11"

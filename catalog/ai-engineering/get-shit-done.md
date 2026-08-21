@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 4
 status: active
 tags: [meta-prompting, context-engineering, spec-driven, wave-execution, claude-code, opencode, gemini-cli, fresh-context]
+lineage: planning-with-files
 summary: TÂCHES 团队出品的目标倒推 + 波次执行引擎 — 在"全新上下文窗口"上跑 agent，避免 context rot；spec-driven 开发，~7.9k stars，"Claude Code 社区的 context engineering 风暴"
 ---
 

@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 3
 status: active
 tags: [google-antigravity, cli, gemini, agent-harness, terminal, vibe-coding, official]
+lineage: anthropics/claude-code
 summary: Google 官方 Antigravity agent harness 的 CLI 端 — 把 Antigravity 的推理 / 执行 / 编排能力搬进 terminal，自然语言驱动代码编辑 / GitHub 操作 / 任务编排，~1.9k stars，Google agent 战略的官方外延
 ---
 

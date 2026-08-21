@@ -12,6 +12,7 @@ updated: 2026-08-13
 rating: 4
 status: active
 tags: [agent-skills, claude-code, slash-commands, role-based, ceo-mode, eng-mode, qa-mode, ship-mode]
+lineage: anthropics/claude-code
 summary: Garry Tan 的 Claude Code 技能栈 — 23 个 slash-command 模式（CEO / eng / design review / QA / ship / browse / retro 等）把一个 Claude 实例变成"虚拟工程团队"，~127k stars，YC CEO 的日常工具
 ---
 
