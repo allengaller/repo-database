@@ -3,7 +3,7 @@
 [![CI](https://github.com/allengaller/repo-database/actions/workflows/ci.yml/badge.svg)](https://github.com/allengaller/repo-database/actions/workflows/ci.yml)
 [![Monthly Scrape](https://github.com/allengaller/repo-database/actions/workflows/monthly-scrape.yml/badge.svg)](https://github.com/allengaller/repo-database/actions/workflows/monthly-scrape.yml)
 [![Monthly Update](https://github.com/allengaller/repo-database/actions/workflows/monthly-update.yml/badge.svg)](https://github.com/allengaller/repo-database/actions/workflows/monthly-update.yml)
-[![Profiles](https://img.shields.io/badge/catalog-104_profiles-brightgreen)](catalog/INDEX.md)
+[![Profiles](https://img.shields.io/badge/catalog-115_profiles-brightgreen)](catalog/INDEX.md)
 [![License](https://img.shields.io/badge/license-MIT-blue)](#license)
 
 [中文文档](README.zh-CN.md) · [Catalog Index](catalog/INDEX.md) · [Report an Issue](https://github.com/allengaller/repo-database/issues)
@@ -11,9 +11,31 @@
 A GitHub repository knowledge base with two complementary halves:
 
 1. **Automated aggregation** — a multi-source scraper (Awesome Lists, GitHub Search API, Hacker News, DEV.to) feeding a zero-build web UI with filtering, inspiration mode, and bookmarks.
-2. **Human curation** — [`catalog/`](catalog/README.md), currently **104 Markdown profiles** across 9 tech domains. One repo per file: frontmatter metadata + a six-section analysis (stack, features, use cases, personal assessment, resources), managed by `scripts/catalog.py` and gated in CI.
+2. **Human curation** — [`catalog/`](catalog/README.md), currently **115 Markdown profiles** across 10 tech domains. One repo per file: frontmatter metadata + a six-section analysis (stack, features, use cases, personal assessment, resources), managed by `scripts/catalog.py` and gated in CI.
 
 The curated half is the centre of gravity. The scraper is the intake funnel; the catalog is what survives review.
+
+---
+
+## 📌 Up-next reading list (interview & career prep)
+
+> Personal reading queue, pinned 2026-08. Eleven newly cataloged repos under [`catalog/interview-career/`](catalog/interview-career/), plus the system-design profiles already in [`fullstack-arch/`](catalog/fullstack-arch/).
+
+| Profile | What it's for | ⭐ |
+|---|---|---|
+| [coding-interview-university.md](catalog/interview-career/coding-interview-university.md) | The master study roadmap (months-long, checklist-driven) | 5 |
+| [tech-interview-handbook.md](catalog/interview-career/tech-interview-handbook.md) | Resume / behavioral / negotiation playbook | 5 |
+| [javascript-algorithms.md](catalog/interview-career/javascript-algorithms.md) | Tested algorithm implementations + Big-O tables | 5 |
+| [javaguide.md](catalog/interview-career/javaguide.md) | Chinese backend guide, actively maintained | 5 |
+| [system-design.md](catalog/interview-career/system-design.md) | Linear system-design course for a 4–6 week sprint | 4 |
+| [awesome-system-design-resources.md](catalog/interview-career/awesome-system-design-resources.md) | Free-resource router (articles / videos / books) | 4 |
+| [system-design-interview.md](catalog/interview-career/system-design-interview.md) | Classic problem set for last-week drills | 3 |
+| [cs-notes.md](catalog/interview-career/cs-notes.md) | Chinese CS-fundamentals quick reference (stale, verify dates) | 4 |
+| [advanced-java.md](catalog/interview-career/advanced-java.md) | Follow-up-question style advanced Q&A | 4 |
+| [hiring-without-whiteboards.md](catalog/interview-career/hiring-without-whiteboards.md) | Companies that skip whiteboarding, with process notes | 4 |
+| [remote-jobs.md](catalog/interview-career/remote-jobs.md) | Remote-friendly company directory | 4 |
+
+Companion profiles already in the catalog: [system-design-primer.md](catalog/fullstack-arch/system-design-primer.md) · [system-design-101.md](catalog/fullstack-arch/system-design-101.md) · [awesome-scalability.md](catalog/fullstack-arch/awesome-scalability.md) · [architecture-decision-record.md](catalog/fullstack-arch/architecture-decision-record.md).
 
 ---
 
@@ -37,7 +59,7 @@ repo-database/
 │   ├── INDEX.md               # Auto-generated (do not hand-edit)
 │   ├── _template.md           # Profile template
 │   ├── _lineage/              # Paradigm lineage dossiers (5 paradigms)
-│   └── <domain>/<repo>.md     # 104 profiles across 9 domains
+│   └── <domain>/<repo>.md     # 115 profiles across 10 domains
 ├── research/                  # Topic-level research (mind-coach, psychology-projects)
 ├── web/                       # Vanilla HTML/CSS/JS frontend + PWA service worker
 ├── tests/                     # 100 pytest cases (scripts / catalog / frontend)
@@ -61,12 +83,13 @@ scrape.py ─────────► data/repos.json ───────�
 
 ## The catalog
 
-104 profiles, 9 domains:
+115 profiles, 10 domains:
 
 | Domain | Profiles | Scope |
 |---|---:|---|
 | `ai-engineering` | 33 | LLM engineering, inference, RAG, coding agents/CLIs |
 | `ai-agents` | 28 | Agent frameworks, harnesses, multi-agent orchestration |
+| `interview-career` | 11 | Interview prep & fundamentals, system-design interviews, resume & job search |
 | `fullstack-arch` | 10 | System design, cloud-native reference architecture & IaC, SRE/observability |
 | `maas-platform` | 10 | Inference engines, model gateways, K8s GPU scheduling, LLMOps |
 | `ai-mental-health` | 7 | AI × psychology/counselling research and datasets |

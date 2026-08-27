@@ -4,11 +4,11 @@ url: https://github.com/Shubhamsaboo/awesome-llm-apps
 domain: ai-agents
 type: awesome-list
 languages: [Python]
-stars: 121000
-forks: 0
+stars: 134515
+forks: 19770
 license: Apache-2.0
 discovered: 2026-08-04
-updated: 2026-08-04
+updated: 2026-08-26
 rating: 4
 status: active
 tags: [awesome-list, llm-apps, templates, multi-agent, mcp, voice-ai, framework-agnostic]
@@ -34,7 +34,7 @@ summary: 87.2k stars、100+ 开箱即用 LLM 应用模板库 — 框架中立、
 | **所属组织/作者** | Shubham Saboo |
 | **描述** | 100+ AI Agent 和 RAG 实战模板合集 |
 | **开源许可** | Apache-2.0 |
-| **Star 数** | ~121,000（含 fork 12.4k） |
+| **Star 数** | 134,515（截至 2026-08，fork 19,770） |
 | **技术类型** | awesome-list + 实用模板库 |
 
 ---
@@ -117,6 +117,7 @@ summary: 87.2k stars、100+ 开箱即用 LLM 应用模板库 — 框架中立、
 | 类型 | 链接 |
 |------|------|
 | **项目仓库** | https://github.com/Shubhamsaboo/awesome-llm-apps |
+| **本库专题调研** | [research/awesome-llm-apps/](../../research/awesome-llm-apps/README.md) —— 仓库分析、十大分类盘点、应用视角与学习路径（2026-08-26） |
 
 ### 关联项目
 

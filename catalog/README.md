@@ -35,6 +35,7 @@ catalog/
 ├── creative-coding/     # 创意编程框架、生成艺术、AI × 艺术创作
 ├── culture-arts/        # 数字人文、文化遗产开放数据、古诗词等人文项目
 ├── fullstack-arch/      # 系统设计知识库、云原生参考架构/IaC、全栈脚手架、SRE 可观测
+├── interview-career/    # 技术面试题库/八股、系统设计面试、简历与求职流程
 ├── maas-platform/       # 推理引擎、模型网关、K8s 算力调度、LLMOps 可观测
 ├── mind-philosophy/     # 心智哲学/唯识/佛教心理学 × 计算实现
 └── mindfulness-apps/    # 冥想/正念应用（PWA、移动端）
@@ -50,6 +51,7 @@ catalog/
 | `creative-coding` | `creative-coding/` | 创意编程框架/工具、生成艺术、AI 音乐/图像创作等 AI × 艺术交叉项目 |
 | `culture-arts` | `culture-arts/` | 数字人文工具与资源、文化遗产开放数据、古诗词等人文社科开源项目 |
 | `fullstack-arch` | `fullstack-arch/` | 系统设计与架构知识库、云原生参考架构与 IaC、全栈应用脚手架、可观测性与 SRE 工程 |
+| `interview-career` | `interview-career/` | 技术面试题库与八股文、系统设计面试课程、算法训练、简历模板与求职流程资源 |
 | `maas-platform` | `maas-platform/` | LLM 推理引擎与部署、模型网关与多模型接入、K8s 算力调度与 AI Stack、LLMOps 与可观测 |
 | `mind-philosophy` | `mind-philosophy/` | 唯识/阿毗达磨/佛教心理学的计算建模与工程实现 |
 | `mindfulness-apps` | `mindfulness-apps/` | 冥想、内观、正念类终端应用 |

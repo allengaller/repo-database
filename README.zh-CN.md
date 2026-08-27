@@ -3,7 +3,7 @@
 [![CI](https://github.com/allengaller/repo-database/actions/workflows/ci.yml/badge.svg)](https://github.com/allengaller/repo-database/actions/workflows/ci.yml)
 [![Monthly Scrape](https://github.com/allengaller/repo-database/actions/workflows/monthly-scrape.yml/badge.svg)](https://github.com/allengaller/repo-database/actions/workflows/monthly-scrape.yml)
 [![Monthly Update](https://github.com/allengaller/repo-database/actions/workflows/monthly-update.yml/badge.svg)](https://github.com/allengaller/repo-database/actions/workflows/monthly-update.yml)
-[![Profiles](https://img.shields.io/badge/catalog-104_profiles-brightgreen)](catalog/INDEX.md)
+[![Profiles](https://img.shields.io/badge/catalog-115_profiles-brightgreen)](catalog/INDEX.md)
 [![License](https://img.shields.io/badge/license-MIT-blue)](#许可协议)
 
 [English](README.md) · [档案索引](catalog/INDEX.md) · [报告问题](https://github.com/allengaller/repo-database/issues)
@@ -11,9 +11,31 @@
 一座 GitHub 仓库知识库，由两个互补的部分组成：
 
 1. **自动化聚合** —— 多源爬虫（Awesome 榜单、GitHub Search API、Hacker News、DEV.to）产出数据集，配一个零构建的 Web UI，提供筛选、灵感探索与收藏管理。
-2. **人工策展** —— [`catalog/`](catalog/README.md)，当前 **104 篇 Markdown 档案**，覆盖 9 个技术领域。一仓一档：frontmatter 元数据 + 六段式深度分析（技术栈、核心特性、应用场景、个人评价、相关资源），由 `scripts/catalog.py` 管理并在 CI 中强制校验。
+2. **人工策展** —— [`catalog/`](catalog/README.md)，当前 **115 篇 Markdown 档案**，覆盖 10 个技术领域。一仓一档：frontmatter 元数据 + 六段式深度分析（技术栈、核心特性、应用场景、个人评价、相关资源），由 `scripts/catalog.py` 管理并在 CI 中强制校验。
 
 策展部分是本仓库的重心。爬虫是入口漏斗，档案库是经过评审后真正留下来的东西。
+
+---
+
+## 📌 近期阅读清单（求职面试向）
+
+> 个人阅读队列，2026-08 置顶。新建档的 11 个仓库位于 [`catalog/interview-career/`](catalog/interview-career/)，另搭配 [`fullstack-arch/`](catalog/fullstack-arch/) 中已有的系统设计档案。
+
+| 档案 | 用途 | ⭐ |
+|---|---|---|
+| [coding-interview-university.md](catalog/interview-career/coding-interview-university.md) | 总路线图：数月期清单式自学计划 | 5 |
+| [tech-interview-handbook.md](catalog/interview-career/tech-interview-handbook.md) | 简历 / 行为面 / 谈薪手册 | 5 |
+| [javascript-algorithms.md](catalog/interview-career/javascript-algorithms.md) | 带单测的算法实现 + 复杂度表 | 5 |
+| [javaguide.md](catalog/interview-career/javaguide.md) | 中文后端指南，持续活跃维护 | 5 |
+| [system-design.md](catalog/interview-career/system-design.md) | 线性系统设计课程，4–6 周冲刺用 | 4 |
+| [awesome-system-design-resources.md](catalog/interview-career/awesome-system-design-resources.md) | 免费资源路由（文章/视频/书） | 4 |
+| [system-design-interview.md](catalog/interview-career/system-design-interview.md) | 经典真题集，最后一周刷题用 | 3 |
+| [cs-notes.md](catalog/interview-career/cs-notes.md) | 中文计算机基础速查（已停更，注意时效） | 4 |
+| [advanced-java.md](catalog/interview-career/advanced-java.md) | 追问式进阶问答 | 4 |
+| [hiring-without-whiteboards.md](catalog/interview-career/hiring-without-whiteboards.md) | 不考白板的公司清单，附流程说明 | 4 |
+| [remote-jobs.md](catalog/interview-career/remote-jobs.md) | 远程友好公司名录 | 4 |
+
+已在库中的配套档案：[system-design-primer.md](catalog/fullstack-arch/system-design-primer.md) · [system-design-101.md](catalog/fullstack-arch/system-design-101.md) · [awesome-scalability.md](catalog/fullstack-arch/awesome-scalability.md) · [architecture-decision-record.md](catalog/fullstack-arch/architecture-decision-record.md)。
 
 ---
 
@@ -37,7 +59,7 @@ repo-database/
 │   ├── INDEX.md               # 自动生成（请勿手工编辑）
 │   ├── _template.md           # 档案模板
 │   ├── _lineage/              # 范式谱系档案（5 个范式）
-│   └── <domain>/<repo>.md     # 9 个领域下共 104 篇档案
+│   └── <domain>/<repo>.md     # 10 个领域下共 115 篇档案
 ├── research/                  # 专题调研（mind-coach、psychology-projects）
 ├── web/                       # 纯 HTML/CSS/JS 前端 + PWA Service Worker
 ├── tests/                     # 100 个 pytest 用例（scripts / catalog / frontend）
@@ -61,12 +83,13 @@ scrape.py ─────────► data/repos.json ───────�
 
 ## 档案库
 
-104 篇档案，9 个领域：
+115 篇档案，10 个领域：
 
 | 领域 | 篇数 | 范围 |
 |---|---:|---|
 | `ai-engineering` | 33 | LLM 工程、推理、RAG、编码 agent/CLI |
 | `ai-agents` | 28 | Agent 框架、harness、多 agent 编排 |
+| `interview-career` | 11 | 技术面试题库与八股、系统设计面试、简历与求职流程 |
 | `fullstack-arch` | 10 | 系统设计、云原生参考架构与 IaC、SRE 与可观测 |
 | `maas-platform` | 10 | 推理引擎、模型网关、K8s 算力调度、LLMOps |
 | `ai-mental-health` | 7 | AI × 心理/咨询方向的研究与数据集 |
