@@ -4,7 +4,7 @@ url: https://github.com/anthropics/skills
 domain: ai-engineering
 type: framework
 languages: [Markdown, Python, JavaScript]
-stars: 167000
+stars: 172107
 forks: 0
 license: Other
 discovered: 2026-08-13
@@ -35,7 +35,7 @@ summary: Anthropic 官方 Agent Skills 仓库 — SKILL.md-based 文件夹（指
 | **所属组织** | Anthropic（Claude 团队） |
 | **描述** | The official Agent Skills repository: SKILL.md-based folders (instructions, scripts, resources) Claude dynamically loads on Claude Code, Claude.ai, and the API |
 | **开源许可** | Anthropic 专有许可（Other，非标准 OSS） |
-| **Star 数** | ~167,000（截至 2026-08） |
+| **Star 数** | 172,107（截至 2026-08） |
 | **技术类型** | framework（跨平台的技能包框架） |
 | **支持平台** | Claude Code + Claude.ai + Anthropic API |
 

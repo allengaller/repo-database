@@ -1,0 +1,66 @@
+{
+  "title": "选择视觉世界 · Choose the visual world",
+  "question": "GTM 页面的视觉方向。保留骰子分配的方向、带走备选卡，或重掷。",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "The Departure Board · 翻牌出发板",
+      "kicker": "THE ROLL",
+      "lineage": "车站 / 机场 split-flap 翻牌信息板（Solari board）",
+      "thesis": "repo-database 是一间出发大厅：机器负责时刻表——四源聚合、评分排序、每月发车；策展人是站长——115 份人工档案是亲手钉在板上的告示。第一屏是一块真实翻动的翻牌板，在播 115 个真实档案，不是一张静态海报。",
+      "palette": ["#0d1a14", "#f2eee2", "#f5a623", "#c8452c"],
+      "materials": [
+        "CSS 3D 翻牌模块（真实档案名循环翻动）",
+        "铆接板框与珐琅漆面板",
+        "Saira（DIN 系车站字体）+ Spline Sans Mono 翻页字",
+        "钉住的纸质告示卡（真实 profile 摘录）+ 红墨印章"
+      ],
+      "viewport": "全宽翻牌出发板：左列十个领域线路（AI ENGINEERING / AGENTS / MAAS…），中列翻牌滚动真实仓库名，右列星星数与评级符号 ★★★★★；板上方车站时钟与 MONTHLY SERVICE 运行条；主动作做成右侧售票窗口——Star on GitHub 票根。",
+      "risk": "翻牌机关若被降级页面抽掉，版面层级必须独立成立；人工策展半壁靠『钉住的告示 + 印章』装置承载，否则会退化成另一张趋势榜单。",
+      "raised": [
+        {
+          "from": "product-truth",
+          "raise": "人工策展是重心（PRODUCT.md 原则 1）：板面必须有站长告示区——钉住的档案卡 + 红印章，占据独立章节，不只做装饰。"
+        }
+      ]
+    },
+    {
+      "id": "model-pick",
+      "label": "The Card Catalog · 卡片目录柜",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "图书馆卡片目录柜（library card catalog）",
+      "thesis": "产品本身就叫 catalog——把它做成一间真正在工作的图书馆目录柜：抽屉被拉开，115 份档案是曼尼拉纸卡片，frontmatter 是打字机打上去的著录字段，评分是红墨日期章，_lineage 是索书号。第一屏就是抽屉拉开、卡片抽出翻面的真实交互。",
+      "palette": ["#d8c49a", "#3b2a1e", "#b3382c", "#2b2b28"],
+      "materials": [
+        "橡木抽屉柜 + 黄铜拉环",
+        "曼尼拉卡纸打字机卡片",
+        "红蓝印泥日期章",
+        "索书号标签与导卡（domain dividers）"
+      ],
+      "viewport": "一整个目录柜占据第一屏：一个抽屉半拉开，三张真实档案卡片成扇形抽出，卡片正面是 frontmatter 著录（name / domain / rating / updated），背面是六段分析摘录；主行动作是柜顶的『入库登记台』——Star on GitHub。",
+      "risk": "『catalog → 卡片目录』是产品名最直接的读法，也是此类『人工策展』页面最常落点；必须以冷静的机构档案材质（曼尼拉纸、橡木、印泥）执行，而非暖调奶油纸 + 衬线的编辑风。"
+    }
+  ],
+  "reroll": {
+    "registers": ["safer", "bolder"]
+  },
+  "buildPath": {
+    "value": "code",
+    "toggle": true
+  },
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard · 类别标准",
+    "thesis": "开发者工具落地页的标准形制，以最高工艺执行：暗色英雄区 + 特性网格 + 数据表格 + 快速开始。",
+    "palette": ["#0c0c0e", "#18181c", "#ededef", "#ffffff"],
+    "materials": [
+      "延续 web/ 既有 token（近黑网格背景）",
+      "JetBrains Mono + Outfit",
+      "特性卡片三列网格",
+      "真实 115 档案统计表格"
+    ],
+    "viewport": "标准结构：顶部导航（名字 + 语言切换 + Star 按钮）→ 英雄区（标题 + 副标题 + 双 CTA）→ 三列特性卡 → 档案展示表 → quick start 代码块 → 页脚。",
+    "risk": "与类别内其他产品无法区分——这是它的设计目标，也是它的天花板。"
+  },
+  "steer": true
+}
