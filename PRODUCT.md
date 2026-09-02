@@ -14,14 +14,14 @@ Zero-build static HTML/CSS/JS — inherits the repository's own convention (`web
 
 Four confirmed audiences, all served by one page:
 
-1. **AI engineering / Agent developers** — looking for high-signal repos in LLM engineering, inference, RAG, agent frameworks; the catalog's strongest holding (61 of 115 profiles in `ai-engineering` + `ai-agents`).
+1. **AI engineering / Agent developers** — looking for high-signal repos in LLM engineering, inference, RAG, agent frameworks; the catalog's strongest holding (61 of 117 profiles in `ai-engineering` + `ai-agents`).
 2. **Developers prepping interviews / changing jobs** — the README's pinned reading list is an interview-prep track (`interview-career`, 11 profiles + system-design companions).
 3. **International open-source community** — GitHub-native visitors evaluating whether to star/fork; English-first expectation.
 4. **Self-hosters** — people who want to fork and run their own repo knowledge base; care about the scraper, `catalog.py` workflow, CI gates, and monthly automation.
 
 ## Product Purpose
 
-repo-database is a GitHub repository knowledge base with two complementary halves: an automated multi-source aggregator (Awesome Lists, GitHub Search API, Hacker News, DEV.to) feeding a zero-build web UI, and a hand-curated catalog of **115 Markdown profiles across 10 tech domains** — one repo per file, six-section analysis, review-gated. The curated half is the centre of gravity; the scraper is the intake funnel. Success for the GTM surface: a qualified visitor stars the repository.
+repo-database is a GitHub repository knowledge base with two complementary halves: an automated multi-source aggregator (Awesome Lists, GitHub Search API, Hacker News, DEV.to) feeding a zero-build web UI, and a hand-curated catalog of **117 Markdown profiles across 10 tech domains** — one repo per file, six-section analysis, review-gated. The curated half is the centre of gravity; the scraper is the intake funnel. Success for the GTM surface: a qualified visitor stars the repository.
 
 ## Positioning
 
@@ -35,7 +35,7 @@ Star lists are noise without judgment; awesome lists go stale without automation
 
 ## Capabilities and Constraints
 
-- All factual claims come from the repository itself: 115 profiles, 10 domains, 4 data sources, scoring formula, 4 CI workflows, 100 pytest cases, MIT license, `uv.lock` reproducibility. **No invented testimonials, customers, download counts, or rankings.**
+- All factual claims come from the repository itself: 117 profiles, 10 domains, 4 data sources, scoring formula, 4 CI workflows, 100 pytest cases, MIT license, `uv.lock` reproducibility. **No invented testimonials, customers, download counts, or rankings.**
 - Bilingual: page ships in 中文 and English (in-page language switch or dual rendering, decided at surface level).
 - No external network dependencies required to render; external fonts allowed with system fallbacks.
 - Must not fabricate a hosted demo or screenshots of data that does not exist.
@@ -48,7 +48,7 @@ Star lists are noise without judgment; awesome lists go stale without automation
 ## Evidence on Hand
 
 - `README.md` / `README.zh-CN.md` — full product narrative and numbers.
-- `catalog/INDEX.md` — auto-generated index of all 115 profiles (real names, ratings, summaries).
+- `catalog/INDEX.md` — auto-generated index of all 117 profiles (real names, ratings, summaries).
 - `catalog/_template.md`, `catalog/README.md` — profile spec and taxonomy (real schema to demonstrate).
 - `data/repos.json` — real aggregated records (28-repo seed with stars/forks/score fields).
 - `data/discoveries.jsonl` — real discovery inbox (423 candidate rows).

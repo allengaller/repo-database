@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-31T00:00:00Z",
+  "title": "Design System: GTM — The Departure Board",
+  "extensions": {
+    "colorMeta": {
+      "amber": {
+        "role": "primary",
+        "displayName": "琥珀运行色 Amber",
+        "canonical": "#f5a623",
+        "tonalRamp": ["oklch(20% 0.04 75)", "oklch(30% 0.06 75)", "oklch(40% 0.08 75)", "oklch(50% 0.1 75)", "oklch(60% 0.12 75)", "oklch(70% 0.14 75)", "oklch(78% 0.16 75)", "oklch(90% 0.08 75)"]
+      },
+      "stamp": {
+        "role": "secondary",
+        "displayName": "印章红 Stamp",
+        "canonical": "#c8452c",
+        "tonalRamp": ["oklch(18% 0.06 30)", "oklch(26% 0.09 30)", "oklch(34% 0.12 30)", "oklch(42% 0.15 30)", "oklch(52% 0.17 30)", "oklch(62% 0.16 30)", "oklch(74% 0.12 30)", "oklch(88% 0.06 30)"]
+      },
+      "hall-ground": {
+        "role": "neutral",
+        "displayName": "大厅底 Hall Ground",
+        "canonical": "#0b150f",
+        "tonalRamp": ["oklch(12% 0.015 160)", "oklch(20% 0.02 160)", "oklch(28% 0.025 160)", "oklch(38% 0.03 160)", "oklch(50% 0.035 160)", "oklch(64% 0.035 160)", "oklch(80% 0.025 160)", "oklch(95% 0.01 160)"]
+      },
+      "enamel": {
+        "role": "neutral",
+        "displayName": "珐琅面 Enamel",
+        "canonical": "#0d1a14",
+        "tonalRamp": ["oklch(13% 0.018 160)", "oklch(21% 0.022 160)", "oklch(30% 0.026 160)", "oklch(40% 0.03 160)", "oklch(52% 0.033 160)", "oklch(66% 0.033 160)", "oklch(82% 0.022 160)", "oklch(96% 0.008 160)"]
+      },
+      "flap": {
+        "role": "neutral",
+        "displayName": "骨白翻牌 Flap",
+        "canonical": "#f2eee2",
+        "tonalRamp": ["oklch(16% 0.01 95)", "oklch(28% 0.012 95)", "oklch(42% 0.014 95)", "oklch(56% 0.015 95)", "oklch(70% 0.014 95)", "oklch(82% 0.012 95)", "oklch(93% 0.01 95)", "oklch(98% 0.005 95)"]
+      },
+      "paper-ink": {
+        "role": "neutral",
+        "displayName": "纸墨 Paper Ink",
+        "canonical": "#2b2b28",
+        "tonalRamp": ["oklch(18% 0.005 90)", "oklch(28% 0.006 90)", "oklch(40% 0.007 90)", "oklch(52% 0.008 90)", "oklch(64% 0.008 90)", "oklch(76% 0.007 90)", "oklch(88% 0.005 90)", "oklch(97% 0.003 90)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "站牌嗓音 Display", "purpose": "大厅主标与段落主标，永远 Saira Condensed 800；中文块骨白实色，不渐变。" },
+      "flap-data": { "displayName": "板上数据 Flap Data", "purpose": "一切真实数据嗓音：翻牌仓库名、时钟、公式、命令；必须 tabular-nums。" },
+      "label": { "displayName": "元信息 Label", "purpose": "元信息与 dt 标签，宽字距小号 Mono。" }
+    },
+    "shadows": [
+      { "name": "board-hang", "value": "0 24px 60px rgba(0,0,0,.5), inset 0 1px 0 rgba(242,238,226,.06)", "purpose": "挂板影：出发板框等悬挂重物。" },
+      { "name": "ticket-edge", "value": "0 4px 0 #c77f0a, 0 16px 34px rgba(0,0,0,.45)", "purpose": "票根厚度：可按压 CTA，hover 6px / active 2px 表达按压。" },
+      { "name": "flap-material", "value": "inset 0 -2px 0 rgba(0,0,0,.18), 0 3px 8px rgba(0,0,0,.35)", "purpose": "翻牌料厚。" },
+      { "name": "paper-drop", "value": "0 14px 30px rgba(0,0,0,.42), 0 2px 6px rgba(0,0,0,.3)", "purpose": "钉在板上的告示纸。" }
+    ],
+    "motion": [
+      { "name": "flap-flip", "value": "flapFlip .5s cubic-bezier(.45,0,.35,1)（rotateX 0→-90°→0，50% 处 brightness .72）", "purpose": "翻牌换字动画；轮换 4s + 行序×350ms stagger；reduced-motion 下禁用。" },
+      { "name": "press", "value": "transform/box-shadow .15s ease", "purpose": "CTA 按压反馈。" },
+      { "name": "paper-settle", "value": "transform .2s ease", "purpose": "纸卡 hover 回正上浮 4px。" }
+    ],
+    "breakpoints": [
+      { "name": "lg", "value": "1024px" },
+      { "name": "md", "value": "760px" },
+      { "name": "sm", "value": "640px" },
+      { "name": "xs", "value": "480px" },
+      { "name": "xxs", "value": "380px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Ticket CTA",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "琥珀票根主行动钮：渐变琥珀底、左右打孔、硬底边厚度可按压。",
+      "html": "<a class='ds-btn-primary' href='#'><svg viewBox='0 0 16 16' width='20' height='20' fill='currentColor' aria-hidden='true'><path d='M8 0l1.9 4.9L15 5.4l-3.8 3.3 1.2 5.1L8 11.1l-4.4 2.7 1.2-5.1L1 5.4l5.1-.5z'/></svg><span class='ds-ticket-text'><b>STAR ON GITHUB</b><small>收藏这座正在发车的档案库</small></span></a>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 10px; position: relative; background: linear-gradient(180deg, var(--amber, #f5a623), #e8991a); color: #1c1204; text-decoration: none; padding: 18px 30px 16px; border-radius: 8px; box-shadow: 0 4px 0 var(--amber-deep, #c77f0a), 0 16px 34px rgba(0,0,0,.45); transition: transform .15s ease, box-shadow .15s ease; } .ds-btn-primary::before, .ds-btn-primary::after { content: ''; position: absolute; top: 50%; width: 18px; height: 18px; border-radius: 50%; background: var(--hall-ground, #0b150f); transform: translateY(-50%); } .ds-btn-primary::before { left: -9px; } .ds-btn-primary::after { right: -9px; } .ds-btn-primary b { font-family: 'Saira Condensed', sans-serif; font-weight: 800; font-size: 21px; letter-spacing: .05em; } .ds-btn-primary small { display: block; font-size: 12.5px; font-weight: 500; opacity: .82; } .ds-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--amber-deep, #c77f0a), 0 22px 44px rgba(0,0,0,.5); } .ds-btn-primary:active { transform: translateY(1px); box-shadow: 0 2px 0 var(--amber-deep, #c77f0a), 0 10px 20px rgba(0,0,0,.4); } .ds-btn-primary:focus-visible { outline: 2px solid var(--amber, #f5a623); outline-offset: 3px; }"
+    },
+    {
+      "name": "Ghost Ticket Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "描边副行动钮：透明底结构线框，hover 转琥珀。",
+      "html": "<a class='ds-btn-secondary' href='#'>浏览 117 篇档案 →</a>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; font-family: 'Saira Condensed', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: .04em; text-decoration: none; color: var(--ink, #e8e4d8); border: 1px solid var(--line-structural, #22382b); border-radius: 8px; padding: 18px 26px; transition: border-color .15s ease, color .15s ease, background .15s ease; } .ds-btn-secondary:hover { border-color: var(--amber, #f5a623); color: var(--amber, #f5a623); background: rgba(245,166,35,.06); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--amber, #f5a623); outline-offset: 3px; }"
+    },
+    {
+      "name": "Split-Flap Tile",
+      "kind": "custom",
+      "refersTo": "flap-data",
+      "description": "签名组件：骨白翻牌片，48.5% 断色中缝 + 底缘阴影，翻转动画换字。",
+      "html": "<div class='ds-flap'><span class='ds-flap-name'>vllm-project/vllm</span></div>",
+      "css": ".ds-flap { position: relative; display: block; background: linear-gradient(180deg, var(--flap, #f2eee2) 0%, var(--flap, #f2eee2) 48.5%, #e6e0ce 48.5%, var(--flap-edge, #d9d3c1) 100%); border-radius: 6px; padding: 8px 14px; box-shadow: inset 0 -2px 0 rgba(0,0,0,.18), 0 3px 8px rgba(0,0,0,.35); } .ds-flap::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1.5px; background: rgba(13,26,20,.28); } .ds-flap-name { display: block; font-family: 'Spline Sans Mono', monospace; font-weight: 500; font-size: 16.5px; color: var(--flap-ink, #22301f); letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; } @keyframes dsFlapFlip { 0% { transform: rotateX(0); } 50% { transform: rotateX(-90deg); filter: brightness(.72); } 100% { transform: rotateX(0); filter: brightness(1); } } .ds-flap { animation: dsFlapFlip .5s cubic-bezier(.45,0,.35,1); } @media (prefers-reduced-motion: reduce) { .ds-flap { animation: none; } }"
+    },
+    {
+      "name": "Enamel Gate Card",
+      "kind": "card",
+      "refersTo": "card-enamel",
+      "description": "珐琅信息卡：结构线框 + 右上 PASS 绿章。",
+      "html": "<div class='ds-gate'><span class='ds-gate-stamp'>PASS</span><h3>schema 校验</h3><p>8 个必填 frontmatter 字段缺失即非零退出。</p></div>",
+      "css": ".ds-gate { position: relative; border: 1px solid var(--line-structural, #22382b); border-radius: 10px; background: var(--enamel, #0d1a14); padding: 24px 20px; } .ds-gate-stamp { position: absolute; top: 16px; right: 16px; font-family: 'Saira Condensed', sans-serif; font-weight: 800; font-size: 12.5px; letter-spacing: .14em; color: #6fae87; border: 2px solid #6fae87; border-radius: 4px; padding: 2px 7px; transform: rotate(8deg); opacity: .85; } .ds-gate h3 { font-family: 'Saira Condensed', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: .03em; color: var(--ink, #e8e4d8); margin: 0 0 8px; padding-right: 64px; } .ds-gate p { font-size: 13.8px; color: var(--ink-dim, #a8b3a4); margin: 0; }"
+    },
+    {
+      "name": "Paper Notice Card",
+      "kind": "card",
+      "refersTo": "card-paper",
+      "description": "钉在板上的告示纸卡：纸色渐变、顶部圆钉、微倾斜、hover 回正。",
+      "html": "<div class='ds-notice'><span class='ds-pin'></span><div class='ds-notice-head'><h3>anthropics/skills</h3><span class='ds-stamp'>5/5</span></div><p>方法论技能包——把工程实践装成可被任何 harness 加载的 SKILL.md。</p></div>",
+      "css": ".ds-notice { position: relative; background: linear-gradient(178deg, #f4eddc, #e9e0c9); color: #2b2b28; border-radius: 3px; padding: 30px 24px 22px; box-shadow: 0 14px 30px rgba(0,0,0,.42), 0 2px 6px rgba(0,0,0,.3); transform: rotate(-.7deg); transition: transform .2s ease, box-shadow .2s ease; } .ds-notice:hover { transform: rotate(0) translateY(-4px); } .ds-pin { position: absolute; top: 12px; left: 50%; margin-left: -7px; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #e0684f, #8f2c1c 72%); box-shadow: 0 3px 5px rgba(0,0,0,.45), inset 0 -2px 3px rgba(0,0,0,.35); } .ds-notice-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 2px solid rgba(43,43,40,.16); padding-bottom: 12px; margin-bottom: 14px; } .ds-notice h3 { font-family: 'Spline Sans Mono', monospace; font-weight: 700; font-size: 15px; color: #2b2b28; word-break: break-all; line-height: 1.35; margin: 0; } .ds-notice p { font-size: 13.8px; line-height: 1.7; color: #45443c; margin: 0; } @media (prefers-reduced-motion: reduce) { .ds-notice { transition: none; } }"
+    },
+    {
+      "name": "Rating Stamp",
+      "kind": "custom",
+      "refersTo": "stamp-badge",
+      "description": "红墨评级章：章面微倾 + 印泥 mask。",
+      "html": "<span class='ds-stamp' aria-label='rating 5/5'>5/5</span>",
+      "css": ".ds-stamp { display: inline-block; font-family: 'Saira Condensed', sans-serif; font-weight: 800; font-size: 17px; color: var(--stamp-ink, #b3382c); border: 2.5px solid var(--stamp-ink, #b3382c); border-radius: 6px; padding: 3px 9px; transform: rotate(-7deg); letter-spacing: .06em; opacity: .92; -webkit-mask-image: radial-gradient(circle at 30% 40%, black 92%, rgba(0,0,0,.75) 100%); mask-image: radial-gradient(circle at 30% 40%, black 92%, rgba(0,0,0,.75) 100%); }"
+    },
+    {
+      "name": "Language Toggle",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "站牌小方钮：Mono 宽字距，hover 琥珀。",
+      "html": "<button class='ds-lang-toggle' type='button'>EN</button>",
+      "css": ".ds-lang-toggle { font-family: 'Spline Sans Mono', monospace; font-size: 13px; font-weight: 700; color: var(--ink, #e8e4d8); background: transparent; border: 1px solid var(--line-structural, #22382b); border-radius: 4px; padding: 8px 12px; cursor: pointer; letter-spacing: .08em; transition: border-color .15s ease, color .15s ease; } .ds-lang-toggle:hover { border-color: var(--amber, #f5a623); color: var(--amber, #f5a623); } .ds-lang-toggle:focus-visible { outline: 2px solid var(--amber, #f5a623); outline-offset: 3px; }"
+    },
+    {
+      "name": "Formula Block",
+      "kind": "custom",
+      "refersTo": "flap-data",
+      "description": "珐琅公式/命令块：内顶高光 + Mono pre 横滚。",
+      "html": "<pre class='ds-formula'><code>score = stars + forks + engagement\n      + momentum ×10 + commit_activity ×2</code></pre>",
+      "css": ".ds-formula { background: var(--enamel, #0d1a14); border: 1px solid var(--line-structural, #22382b); border-radius: 10px; padding: 20px 22px; overflow-x: auto; box-shadow: inset 0 1px 0 rgba(242,238,226,.05), 0 12px 28px rgba(0,0,0,.35); margin: 0; } .ds-formula code { font-family: 'Spline Sans Mono', monospace; font-size: 13.5px; line-height: 1.75; color: var(--flap, #f2eee2); white-space: pre; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "THE ROLL · 翻牌出发板",
+    "overview": "整个页面是一座深绿珐琅面的车站出发大厅：机器把上千个仓库排进时刻表，人把值得留下的钉在板上。所有视觉决策都从“物理车站器具”出发——板是挂在墙上的重物（大而软的环境影 + 顶部内高光的珐琅反光），翻牌是骨白塑料片（渐变面 + 中缝 + 翻转动画），告示是钉在软木板上的纸卡（纸色渐变、微倾斜、红墨印章），谱系是地铁线路图（粗线、圆站牌、虚线表亲）。密度上是“时刻表式密排 + 告示卡式留白”的交替：出发板行与行之间只有 1px 软分隔线（信息器具），叙事段之间则是 clamp(72px, 9vw, 120px) 的大段呼吸。双语文本是站牌的本体语言——每块标牌都是“中文主标 + 英文/拼音副标”成对出现，不是装饰而是车站标识系统的构成规则。",
+    "keyCharacteristics": [
+      "深绿珐琅分层底：大厅底色比板面更深一层，一切器具浮在其上",
+      "骨白翻牌是唯一的“亮面材质”，承担所有真实数据展示",
+      "琥珀 = 机器/服务状态；印章红 = 人工判断痕迹；绿 PASS 章 = CI 放行——三色各司其职",
+      "硬底边阴影 + 软环境影的“实物厚度”深度模型",
+      "全部数字用等宽 tabular-nums，像真的排班数据"
+    ],
+    "rules": [
+      { "name": "The Red-Ink-Is-Human Rule", "body": "印章红只出现在“人做过判断”的地方（评级章、人工痕迹链接、人工谱系线）。机器调度、自动化、数据一律用琥珀。绿色只表示 CI 放行。三色越界即语义错误。", "section": "colors" },
+      { "name": "The Two-Inks Rule", "body": "深墨只写在亮材质上（flap-ink 写在骨白翻牌、paper-ink 写在纸卡），浅墨只写在暗底上。琥珀底 CTA 用自己的深褐墨 #1c1204，不用任何灰阶。", "section": "colors" },
+      { "name": "The Transit-Voice Rule", "body": "标牌文字永远 Saira Condensed 700/800 + 字距，正文永远 Saira 常宽。等宽字只写“板上会出现的真实数据”，不用于标题或正文强调。", "section": "typography" },
+      { "name": "The Edge-Shadow Rule", "body": "有“可按压感”的元件（CTA）必须带 0 Npx 0 <深一档材质色> 硬底边影，且 hover/active 通过增减 N 表达按压；环境影只补充悬挂感，永不单独承担深度。", "section": "elevation" }
+    ],
+    "dos": [
+      "Do 一切数字（星数、评分、时刻）用 Spline Sans Mono + font-variant-numeric: tabular-nums。",
+      "Do 每块中文标牌成对给出英文/副标，作为车站标识系统的固定构成。",
+      "Do 任何入场动画都配 prefers-reduced-motion 的降级路径（直接换字、去过渡）。",
+      "Do 数据网格轨道写 minmax(0,1fr)，防不可断行内容（pre、长仓库名）撑爆布局。"
+    ],
+    "donts": [
+      "Don't 对大号展示文字做渐变填充——骨白主标是实色 var(--flap)（渐变字在建成后已被判为赝品材质并移除）。",
+      "Don't 让印章红出现在机器/自动化的语义上，或让琥珀出现在人工判断的语义上（三色分职见 Red-Ink-Is-Human Rule）。",
+      "Don't 使用图标字体或 glyph 字符图标；只用内联 stroke SVG。",
+      "Don't 用彩色发光或大面积模糊投影制造深度——深度只有“厚度 + 悬挂 + 珐琅反光”三件套。",
+      "Don't 底色偏离绿系（不许蓝黑或暖奶油化大厅底色）。"
+    ]
+  }
+}
