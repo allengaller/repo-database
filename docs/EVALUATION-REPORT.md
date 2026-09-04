@@ -1,5 +1,6 @@
 # repo-hoarder 项目全面评估报告
 
+> 注：本报告为归档文档，撰写时项目名为 repo-hoarder，现已更名为 **repo-database**。最新评估见 [EVALUATION-2026-09-04.md](./EVALUATION-2026-09-04.md)。
 > 评估日期：2026-07-19
 > 评估范围：repo-hoarder 仓库全量代码、数据、工作流、前端、安全、性能、可访问性
 > 评估人：Qoder AI

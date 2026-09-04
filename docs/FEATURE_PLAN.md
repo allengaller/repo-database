@@ -1,5 +1,6 @@
 # 功能规划：`repo-hoarder`
 
+> 注：本报告为归档文档，撰写时项目名为 repo-hoarder，现已更名为 **repo-database**。
 > 规划时间：2026-06-01  
 > 当前版本：修复后稳定版（FIX_REPORT.md）
 

@@ -160,7 +160,7 @@ CI 以 `|| true` 放行 lint,警告无消化机制。当前 40 条,典型如:`yo
 
 ## 六、附录:核验方法与复现命令
 
-本报告所有数字由以下命令实测得出(2026-09-04,`.venv` 环境):
+本报告所有数字由以下命令实测得出(2026-09-04,`.venv` 环境)。修复完成后,这些检查已聚合为一键入口:`python scripts/eval_baseline.py`。
 
 ```bash
 # 测试(100 passed in 0.38s,离线)
@@ -188,6 +188,39 @@ diff -q GTM/gtm.css GTM/dist/gtm.css && diff -q GTM/gtm.js GTM/dist/gtm.js \
 # 发现收件箱规模
 wc -l data/discoveries.jsonl                                                     # 423
 ```
+
+---
+
+## 七、修复记录(2026-09-04 · 评估当日执行)
+
+本节记录路线图各项的实际执行结果,含对上文评估的一处**事实纠正**。
+
+### 7.1 已完成项
+
+| 项 | 结果 | 证据 |
+|---|---|---|
+| P0 · README 口径 | 8 处 `115` → `117`(含 `ai-engineering` 表项 33→35);`check_readme_consistency()` 固化进 `catalog.py validate`,badge/正文/领域表三个口径全部机检 | `scripts/catalog.py`;5 个单测覆盖正反用例 |
+| P1 · ruff | 71 → **0**(36 个自动修复 + 39 个手工:时区显式 UTC、网络异常收窄、`date.fromisoformat` 替代 naive strptime、EXE001 补执行位);`ruff check` 已接入 `ci.yml` 硬门禁 | 全绿;`uv.lock` 锁定规则行为 |
+| P1 · GTM/dist | **纠正**:dist 从未被提交(`.gitignore` 的 `dist/` 规则一直生效),仅本地残留副本——已删除,不存在仓库内双源 | 上文 §三 P1 描述"提交进了 git"有误,以此为准 |
+| P2 · Pages 矛盾 | 实测 GitHub Pages API 返回 404(未启用)→ `PRODUCT.md` 正确;删除每次 push 必失败的 `deploy-pages.yml` 及 `monthly-update.yml` 中的触发步骤,FAQ 改为"自行添加 workflow(旧版在 git 历史可参考)" | `gh api repos/.../pages` → 404 |
+| P2 · catalog lint | 40 → **0**:同义词典扩充(参考资料/应用方向/覆盖维度)、6 篇补事实性"技术栈"行、22 处星数补"截至"日期戳、4 篇摘要扩写;星数戳检查放宽为语义匹配(`截至`/`as of`),消除标点形式造成的假阳性;`mindfulness-apps` 目录入规为"孵化例外(2 篇起步,连续两月不足 3 篇则并入相近领域)" | `catalog.py lint` → "Lint OK: 117 profiles, no warnings" |
+| P3 · 卫生项 | `.mimosa/` 解除跟踪并 ignore(会话中被 hook 静默跟踪,已 `git rm --cached`);4 份归档文档头部加更名注记;两份 README 的 tests 行数与 workflow 列表同步 | `git status` 干净 |
+| P3 · 前端逻辑测试 | 新增 `tests/js/logic_check.cjs`(node:vm 沙箱加载完整 app.js,stub DOM/localStorage/fetch)+ `tests/test_frontend_logic.py` 10 个断言;**顺带发现并修复真 bug**:`getLicense()` 大写化文本后用混合大小写关键词匹配,Apache/Unlicense/CC0 永远无法命中——已改双侧小写并去重键 | node v22 实跑通过;无 node 环境自动 skip |
+| 复评基线 | 新增 `scripts/eval_baseline.py`:进程内跑 pytest(pytest.main)+ catalog validate/lint(直接函数调用)+ README 漂移 + GTM/dist + 杂散跟踪检查,ruff 经 PATH 字面量调用;PASS/FAIL/WARN 汇总,硬检查非零即退出 | 首跑即抓到自身一处 RUF100 并修复 |
+
+### 7.2 验证结果(修复后全量实跑)
+
+```
+pytest            116 passed(106 → 116,新增一致性 5 + 前端逻辑 10 - 计数口径)
+ruff              All checks passed(71 → 0)
+catalog validate  Validation OK: 117 profiles
+catalog lint      Lint OK: 117 profiles, no warnings(40 → 0)
+eval_baseline     Result: all hard checks passed
+```
+
+### 7.3 遗留事项
+
+- 无。路线图"立即/短期"六项与"中期"两项全部闭环;下轮复评可直接以 `python scripts/eval_baseline.py` 为起点。
 
 ---
 

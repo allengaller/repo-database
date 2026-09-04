@@ -1,5 +1,6 @@
 # 项目检查报告：`repo-hoarder`
 
+> 注：本报告为归档文档，撰写时项目名为 repo-hoarder，现已更名为 **repo-database**。
 > 检查时间：2026-05-31  
 > 检查范围：`scripts/scrape.py`、`web/` 前端、`.github/workflows/`、数据质量
 
