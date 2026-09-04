@@ -23,6 +23,9 @@ build/
 # Logs
 *.log
 
+# Meoo deploy binding (project secrets)
+.env
+
 # data/repos.json is a curated seed committed to the repo (see .gitattributes
 # marking it `-diff -merge` so monthly CI updates stay clean). Local scrapes
 # that produce a different path or filename remain ignored by virtue of being
