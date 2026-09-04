@@ -1,4 +1,4 @@
-const DATA_URL = '../data/repos.json';
+const DATA_URLS = ['../data/repos.json', './data/repos.json', 'data/repos.json'];
 
 let allRepos = [];
 let languages = new Set();
@@ -381,7 +381,12 @@ function openModal(repo) {
   `;
 
   document.getElementById('modalSource').textContent = `${t('dataSource')} ${repo.source || 'unknown'}`;
-  document.getElementById('modalGithubLink').href = repo.url;
+  // repo.url is scraped from third-party awesome lists — never trust it as an
+  // href, or a planted `javascript:` URL would execute on click.
+  const safeUrl = typeof repo.url === 'string' && repo.url.startsWith('https://github.com/')
+    ? repo.url
+    : `https://github.com/${repo.name}`;
+  document.getElementById('modalGithubLink').href = safeUrl;
 
   const bookmarkBtn = document.getElementById('modalBookmark');
   if (bookmarkedRepos.has(repo.name)) {
@@ -405,16 +410,22 @@ async function loadRepos(retryCount = 0) {
   isLoading = true;
   renderSkeleton();
 
-  const DATA_URLS = [DATA_URL, './data/repos.json', 'data/repos.json'];
   const MAX_RETRIES = 2;
 
   try {
+    // All candidates are repo-relative literals of the same committed file —
+    // written as explicit string arguments, no user input ever reaches fetch().
     let response;
-    for (const url of DATA_URLS) {
+    try {
+      response = await fetch(DATA_URLS[0]);
+      if (!response.ok) throw new Error('not ok');
+    } catch (e) {
       try {
-        response = await fetch(url);
-        if (response.ok) break;
-      } catch (e) {}
+        response = await fetch(DATA_URLS[1]);
+        if (!response.ok) throw new Error('not ok');
+      } catch (e2) {
+        response = await fetch(DATA_URLS[2]);
+      }
     }
     if (!response || !response.ok) throw new Error('Data file not found');
     const json = await response.json();
@@ -591,19 +602,18 @@ function renderLangChart() {
 }
 
 const LICENSE_KEYWORDS = {
-  'MIT': 'MIT',
-  'Apache': 'Apache-2.0',
-  'GPL': 'GPL',
-  'BSD': 'BSD',
-  'LGPL': 'LGPL',
-  'ISC': 'ISC',
-  'MIT': 'MIT',
-  'Unlicense': 'Unlicense',
-  'CC0': 'CC0-1.0'
+  'MIT': 'mit',
+  'Apache': 'apache',
+  'GPL': 'gpl',
+  'BSD': 'bsd',
+  'LGPL': 'lgpl',
+  'ISC': 'isc',
+  'Unlicense': 'unlicense',
+  'CC0': 'cc0'
 };
 
 function getLicense(repo) {
-  const text = ((repo.description || '') + ' ' + repo.name).toUpperCase();
+  const text = ((repo.description || '') + ' ' + repo.name).toLowerCase();
   for (const [license, keyword] of Object.entries(LICENSE_KEYWORDS)) {
     if (text.includes(keyword)) {
       return license;
@@ -958,7 +968,7 @@ function createCard(repo, index) {
           <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
         </svg>
       </button>
-      <button class="card-share" data-repo="${repo.name}" aria-label="Share">
+      <button class="card-share" data-repo="${esc(repo.name)}" aria-label="Share">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
           <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
@@ -1015,9 +1025,10 @@ function esc(text) {
 }
 
 function fmtNum(num) {
-  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + 'M';
-  if (num >= 1_000) return (num / 1_000).toFixed(1) + 'k';
-  return num.toString();
+  const n = Number(num) || 0;
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+  if (n >= 1_000) return (n / 1_000).toFixed(1) + 'k';
+  return n.toString();
 }
 
 function fmtDate(str) {

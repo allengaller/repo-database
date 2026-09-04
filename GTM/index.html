@@ -193,10 +193,9 @@
             <caption data-i18n="wfCap">月度自动化的四班列车</caption>
             <thead><tr><th data-i18n="wfHead1">班次</th><th data-i18n="wfHead2">发车时刻</th><th data-i18n="wfHead3">任务</th></tr></thead>
             <tbody>
-              <tr><td>ci.yml</td><td>push / PR</td><td>pytest → validate → lint</td></tr>
+              <tr><td>ci.yml</td><td>push / PR</td><td>pytest → ruff → validate → lint</td></tr>
               <tr><td>monthly-scrape</td><td>01 日 00:00 UTC</td><td data-i18n="wf1">全量四源抓取，提交 repos.json</td></tr>
               <tr><td>monthly-update</td><td>01 日 06:00 UTC</td><td data-i18n="wf2">增量抓取 + refresh + 重建索引</td></tr>
-              <tr><td>deploy-pages</td><td>push to main</td><td data-i18n="wf3">web/ 发布 GitHub Pages</td></tr>
             </tbody>
           </table>
         </div>
@@ -371,7 +370,7 @@ cd repo-database &amp;&amp; uv sync --extra dev</code></pre><span class="qs-labe
         <div class="qs-cmd"><span class="qs-no">3</span><pre><code>python3 scripts/catalog.py new https://github.com/owner/repo \
   --domain maas-platform</code></pre><span class="qs-label" data-i18n="qs3">建档 · 生成档案草稿</span></div>
       </div>
-      <p class="qs-note" data-i18n="qsNote">想要在线版本？Fork 后在 Settings → Pages 选择 GitHub Actions，deploy-pages.yml 会把 web/ 发布到你的 github.io——这座车站随时可以复制。</p>
+              <p class="qs-note" data-i18n="qsNote">想要在线版本？Fork 后在 Settings → Pages 选择 GitHub Actions，再加一个发布 web/ 的静态站点 workflow 即可上线——这座车站随时可以复制。</p>
     </section>
 
     <!-- ============ 终到 ============ -->
