@@ -9,18 +9,17 @@ import os
 import re
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 try:
     import requests
-    from requests.adapters import HTTPAdapter
-    from urllib3.util.retry import Retry
 except ImportError:
     print("Error: 'requests' package is required. Install with: pip install -r requirements.txt")
     sys.exit(1)
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import get_headers, calculate_score, merge_repo  # noqa: E402
+from common import calculate_score, get_headers, get_session, merge_repo
 
 # Configuration
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
@@ -103,25 +102,6 @@ GITHUB_NON_REPO_OWNERS = {
 }
 
 
-def get_session():
-    """Create a requests session with retry + exponential backoff.
-
-    Retries up to 3 times on 429/500/502/503/504 with backoff
-    factor 1.0 (1s, 2s, 4s between retries).
-    """
-    session = requests.Session()
-    retry = Retry(
-        total=3,
-        backoff_factor=1.0,
-        status_forcelist=[429, 500, 502, 503, 504],
-        allowed_methods=["GET"],
-    )
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount("https://", adapter)
-    session.mount("http://", adapter)
-    return session
-
-
 def fetch_commit_activity(owner, repo):
     """Return the number of commits in the last 4 weeks (free, no token).
 
@@ -134,7 +114,7 @@ def fetch_commit_activity(owner, repo):
         if resp.status_code != 200 or not isinstance(resp.json(), list):
             return 0
         return sum(w.get("total", 0) for w in resp.json()[-4:])
-    except Exception:
+    except (requests.RequestException, ValueError, TypeError, KeyError, AttributeError):
         return 0
 
 
@@ -210,7 +190,7 @@ def fetch_github_repo_details(owner, repo):
             return resp.json()
         print(f"    Unexpected status {resp.status_code}")
         return None
-    except Exception as e:
+    except (requests.RequestException, ValueError, AttributeError) as e:
         print(f"    Error: {e}")
         return None
 
@@ -256,7 +236,7 @@ def fetch_awesome_lists():
 
             print(f"✅ {fetched} valid")
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — one bad source must not kill the whole run
             print(f"error: {e}")
 
         time.sleep(0.3)
@@ -268,7 +248,7 @@ def fetch_awesome_lists():
 def search_github_repos(query, min_stars=1000, per_page=30):
     """Search GitHub repos using API"""
     url = "https://api.github.com/search/repositories"
-    current_year = datetime.now().year
+    current_year = datetime.now(UTC).year
     params = {
         "q": f"{query} created:{current_year}-01-01..{current_year}-12-31 stars:>={min_stars}",
         "sort": "stars",
@@ -285,7 +265,7 @@ def search_github_repos(query, min_stars=1000, per_page=30):
             return []
         resp.raise_for_status()
         return resp.json().get("items", [])
-    except Exception as e:
+    except (requests.RequestException, ValueError, AttributeError) as e:
         print(f"    Error: {e}")
         return []
 
@@ -332,12 +312,12 @@ def estimate_today_stars(repo_data):
     Scale: 0..~150, roughly matching real daily-star magnitudes.
     """
     try:
-        pushed = datetime.fromisoformat(repo_data["pushed_at"].replace("Z", "+00:00"))
-        created = datetime.fromisoformat(repo_data["created_at"].replace("Z", "+00:00"))
+        pushed = datetime.fromisoformat(repo_data["pushed_at"])
+        created = datetime.fromisoformat(repo_data["created_at"])
     except (KeyError, TypeError, ValueError):
         return 0
 
-    now = datetime.now(pushed.tzinfo) if pushed.tzinfo else datetime.now()
+    now = datetime.now(pushed.tzinfo or UTC)
     hours_since_push = max((now - pushed).total_seconds() / 3600, 0)
     days_old = max((now - created).total_seconds() / 86400, 1)
 
@@ -370,7 +350,7 @@ def fetch_trending_repos():
 
     trending_repos = {}
 
-    today = datetime.now()
+    today = datetime.now(UTC)
     one_day_ago = (today - timedelta(days=1)).strftime("%Y-%m-%d")
     one_week_ago = (today - timedelta(days=7)).strftime("%Y-%m-%d")
     one_month_ago = (today - timedelta(days=30)).strftime("%Y-%m-%d")
@@ -475,12 +455,12 @@ def fetch_hackernews():
                                 )
 
                 time.sleep(0.2)
-            except Exception:
+            except Exception:  # noqa: BLE001, S112 — skip stories that fail to parse
                 continue
 
         print(f"  ✅ Collected {len(hn_repos)} repos from Hacker News")
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 — per-source boundary, keep scraping other sources
         print(f"  Error: {e}")
 
     return hn_repos
@@ -547,7 +527,7 @@ def fetch_devto_articles():
 
         print(f"  ✅ Collected {len(devto_repos)} repos from DEV.to")
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 — per-source boundary, keep scraping other sources
         print(f"  Error: {e}")
 
     return devto_repos
@@ -579,7 +559,7 @@ def format_api_repo(r):
         "language": r.get("language") or "Unknown",
         "today_stars": 0,
         "score": r["stargazers_count"],
-        "fetched_at": datetime.now().isoformat(),
+        "fetched_at": datetime.now(UTC).isoformat(),
         "source": "github_api",
     }
 
@@ -613,11 +593,11 @@ def merge_and_sort(all_repos):
 
 def save_results(repos):
     """Save to JSON file"""
-    print(f"\n[6/6] Saving results...")
+    print("\n[6/6] Saving results...")
 
     output = {
         "schema_version": 2,
-        "fetched_at": datetime.now().isoformat(),
+        "fetched_at": datetime.now(UTC).isoformat(),
         "total": len(repos),
         "sources": ["awesome_lists", "github_api", "trending", "hackernews", "devto"],
         "criteria": {
@@ -631,10 +611,11 @@ def save_results(repos):
     # Ensure data directory exists
     os.makedirs("data", exist_ok=True)
 
-    with open("data/repos.json", "w", encoding="utf-8") as f:
-        json.dump(output, f, ensure_ascii=False, indent=2)
+    Path("data/repos.json").write_text(
+        json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
 
-    print(f"  ✅ Saved to data/repos.json")
+    print("  ✅ Saved to data/repos.json")
     return output
 
 
@@ -662,7 +643,7 @@ def main():
     print("🏆 GitHub Treasure Repo Scraper")
     print("   Sources: Awesome Lists + GitHub API + HN + DEV.to")
     print("=" * 60)
-    print(f"\nStarted at {datetime.now().isoformat()}")
+    print(f"\nStarted at {datetime.now(UTC).isoformat()}")
 
     if GITHUB_TOKEN:
         print("   🔐 Using GitHub Token for higher rate limits")
@@ -687,15 +668,15 @@ def main():
 
     # Process and save
     repos = merge_and_sort(all_repos)
-    output = save_results(repos)
+    save_results(repos)
 
     # Print summary
     print_top_repos(repos)
 
     # Stats
-    lang_count = len(set(r["language"] for r in repos))
+    lang_count = len({r["language"] for r in repos})
     total_stars = sum(r["stars"] for r in repos)
-    print(f"\n📊 Stats:")
+    print("\n📊 Stats:")
     print(f"   Total repos: {len(repos)}")
     print(f"   Total stars: {total_stars:,}")
     print(f"   Languages: {lang_count}")

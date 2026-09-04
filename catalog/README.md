@@ -56,7 +56,7 @@ catalog/
 | `mind-philosophy` | `mind-philosophy/` | 唯识/阿毗达磨/佛教心理学的计算建模与工程实现 |
 | `mindfulness-apps` | `mindfulness-apps/` | 冥想、内观、正念类终端应用 |
 
-**新增领域**：新建目录（小写、连字符分隔），并在上表和 `scripts/catalog.py` 的 `DOMAINS` 中同步注册。领域应按"收录 3 篇以上才立目录"原则克制增设，宁可先挂靠相近领域。
+**新增领域**：新建目录（小写、连字符分隔），并在上表和 `scripts/catalog.py` 的 `DOMAINS` 中同步注册。领域应按"收录 3 篇以上才立目录"原则克制增设，宁可先挂靠相近领域。**孵化例外**：确有独立收录方向的新领域允许 2 篇起步（如 `mindfulness-apps/`），但需持续补齐——连续两次月度审视仍不足 3 篇时，应并入相近领域。
 
 ### 类型（type）取值
 

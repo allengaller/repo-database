@@ -12,7 +12,7 @@ updated: 2026-07-30
 rating: 4
 status: active
 tags: [pwa, meditation, vipassana]
-summary: 游戏化内观冥想 PWA，八角形 SVG 觉察-标记机制
+summary: 游戏化内观冥想 PWA — 八角形 SVG"觉察-标记"交互把内观操作转化为点击体验，为冥想类产品提供优秀的交互范式参考
 ---
 
 # Vipassana App - giekaton/vipassana-app 深度研究

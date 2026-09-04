@@ -6,7 +6,6 @@ Usage:
     python3 scripts/backfill_lineage.py
 """
 
-import re
 from pathlib import Path
 
 # Lineage mapping based on previous analysis
@@ -69,8 +68,7 @@ def add_lineage_to_frontmatter(file_path, lineage):
     new_frontmatter = "\n".join(new_lines)
     new_content = f"---\n{new_frontmatter}\n---\n{body}"
 
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.write(new_content)
+    Path(file_path).write_text(new_content, encoding="utf-8")
 
     return True
 
@@ -128,7 +126,7 @@ def main():
         else:
             skipped += 1
 
-    print(f"\n✅ Backfill complete:")
+    print("\n✅ Backfill complete:")
     print(f"  Updated: {updated}")
     print(f"  Skipped: {skipped}")
     print(f"  Failed:  {failed}")

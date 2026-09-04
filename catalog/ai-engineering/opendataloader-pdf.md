@@ -25,7 +25,7 @@ summary: 基准测试第一的 PDF 解析器（0.907 准确率）——结构化
 | 维护方 | OpenDataLoader Project（与 PDF Association + Dual Lab 合作） |
 | 主语言 | Java（核心引擎）+ Python/Node.js/Java SDK |
 | License | Apache-2.0（2026-03 从 MPL-2.0 切换） |
-| 当前 Stars | ~15.5k（2026-08） |
+| 当前 Stars | ~15.5k（截至 2026-08） |
 | 最近发布 | v2.4.7（2026-05-27） |
 | Commits | 847+ |
 

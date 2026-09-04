@@ -34,7 +34,8 @@ summary: 给 Agent 装一个真正的 Linux 桌面 — Docker 化的 XFCE 桌面
 | **所属组织/作者** | agent0ai（社区驱动） |
 | **描述** | Give your agent a full Linux computer. Agent Zero is an open agent framework for work that needs more than chat. |
 | **开源许可** | MIT |
-| **Star 数** | ~16,000 |
+| **技术栈** | Python |
+| **Star 数** | ~16,000（截至 2026-08） |
 | **新增 commits** | 2,500+ commits（活跃维护） |
 | **技术类型** | framework |
 

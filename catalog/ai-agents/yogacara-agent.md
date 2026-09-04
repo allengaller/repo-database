@@ -43,7 +43,7 @@ yogacara-agent 是 Greatbeing（JueXin）于 2026-04-21 创建的开源项目，
 | 最后更新 | 2026-04-29 |
 | 语言 | Python（主力）、Go Template、Shell、Dockerfile |
 | 许可证 | Apache 2.0 |
-| Stars | 1 |
+| Stars | 1（截至 2026-07） |
 | Forks | 0 |
 | Python 版本 | >=3.10 |
 | 当前版本 | 1.0.0 |

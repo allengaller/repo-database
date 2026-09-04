@@ -25,7 +25,7 @@ summary: Cloudflare 官方 Agents SDK——基于 Durable Objects + V8 隔离，
 | 维护方 | Cloudflare（官方） |
 | 主语言 | TypeScript（运行在 Cloudflare Workers / V8 隔离） |
 | License | MIT |
-| 当前 Stars | ~5.3k（2026-08） |
+| 当前 Stars | ~5.3k（截至 2026-08） |
 | 首次发布 | 2025-02-25（Agents Week） |
 | 配套 | cloudflare/skills（6 个 Agent 工具链）、cloudflare/mcp-server、Project Think |
 

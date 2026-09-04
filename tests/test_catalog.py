@@ -3,7 +3,6 @@
 Run with:  pytest tests/test_catalog.py -v
 """
 
-import os
 import sys
 from pathlib import Path
 
@@ -11,7 +10,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
-import catalog  # noqa: E402
+import catalog
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -311,3 +310,63 @@ def test_lint_profile_legacy_exempt():
     # mind-philosophy domain is exempt from section check
     warns = catalog.lint_profile("catalog/mind-philosophy/x.md", body, meta)
     assert not any("missing body anchors" in w for w in warns)
+
+
+def test_lint_profile_stamp_accepts_loose_punctuation():
+    body = (
+        "## 项目基本信息\n## 技术栈\n## 核心功能\n## 应用场景\n## 个人评价\n"
+        "搜索时未显示具体数值（学术项目，截至 2026-07）"
+    )
+    meta = {"summary": "x" * 60, "stars": 3, "discovered": "2026-08-01", "updated": "2026-08-01"}
+    warns = catalog.lint_profile("catalog/ai-agents/x.md", body, meta)
+    assert not any("fetch-date stamp" in w for w in warns)
+
+
+# ---------- check_readme_consistency ------------------------------------------
+
+@pytest.fixture()
+def real_domain_counts(in_repo_root):
+    counts = {}
+    for _, meta, _ in catalog.iter_profiles():
+        counts[meta.get("domain", "unknown")] = counts.get(meta.get("domain", "unknown"), 0) + 1
+    return counts
+
+
+def test_readme_matches_real_catalog(real_domain_counts):
+    total = sum(real_domain_counts.values())
+    assert catalog.check_readme_consistency(total, real_domain_counts) == []
+
+
+def test_readme_consistency_flags_wrong_total(real_domain_counts):
+    total = sum(real_domain_counts.values())
+    errs = catalog.check_readme_consistency(total - 1, real_domain_counts)
+    assert errs, "wrong total must be detected"
+    assert any("claims" in e for e in errs)
+
+
+def test_readme_consistency_flags_wrong_domain_count(real_domain_counts):
+    counts = dict(real_domain_counts)
+    first = min(counts)
+    counts[first] += 99
+    errs = catalog.check_readme_consistency(sum(real_domain_counts.values()), counts)
+    assert errs, "wrong domain count must be detected"
+    assert any(first in e for e in errs)
+
+
+def test_readme_consistency_flags_missing_domain(real_domain_counts):
+    counts = dict(real_domain_counts)
+    total = sum(counts.values())
+    # catalog has a domain the README table does not mention
+    counts["brand-new-domain"] = 2
+    errs = catalog.check_readme_consistency(total + 2, counts)
+    assert any("domain table missing" in e and "brand-new-domain" in e for e in errs)
+
+
+def test_readme_consistency_flags_unknown_domain(real_domain_counts):
+    counts = dict(real_domain_counts)
+    total = sum(counts.values())
+    # README table lists a domain the catalog no longer has
+    first = min(counts)
+    del counts[first]
+    errs = catalog.check_readme_consistency(total, counts)
+    assert any("unknown domain" in e and first in e for e in errs)

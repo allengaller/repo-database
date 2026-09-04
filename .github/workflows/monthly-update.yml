@@ -97,18 +97,9 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Trigger Pages deploy
-        if: steps.commit.outputs.changed == 'true'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'deploy-pages.yml',
-              ref: 'main'
-            });
-            core.info('Triggered deploy-pages workflow');
+      # NOTE: no Pages deploy here — GitHub Pages is not enabled on this repo
+      # (PRODUCT.md §Operating Context). Restore deploy-pages.yml from git
+      # history and enable Pages in repo settings if a hosted demo is wanted.
 
       - name: Notify on failure
         if: failure()

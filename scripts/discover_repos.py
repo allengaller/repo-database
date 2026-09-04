@@ -19,7 +19,7 @@ import json
 import os
 import subprocess
 import sys
-from datetime import date
+from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -145,7 +145,7 @@ def main():
                     "language": r.get("language"),
                     "updated_at": r.get("updatedAt", ""),
                     "query": query,
-                    "discovered_at": date.today().isoformat(),
+                    "discovered_at": datetime.now(UTC).date().isoformat(),
                     "notes": "",
                 }
                 f.write(json.dumps(record, ensure_ascii=False) + "\n")

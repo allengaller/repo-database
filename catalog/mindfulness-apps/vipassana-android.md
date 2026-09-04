@@ -12,7 +12,7 @@ updated: 2026-07-30
 rating: 2
 status: active
 tags: [android, meditation, vipassana]
-summary: Android 原生内观冥想引导 App，开源供实践者复用
+summary: Android 原生内观冥想引导 App（Java）— 开源供实践者复用的离线引导工具，适合作为本地化冥想产品的参考实现
 ---
 
 # Vipassana Android · Android 内观冥想引导 App
@@ -26,7 +26,7 @@ summary: Android 原生内观冥想引导 App，开源供实践者复用
 | **所属组织** | happyruss |
 | **描述** | Android 平台内观冥想引导应用，开源供其他冥想实践者复用 |
 | **开源许可** | 开源（具体许可未明确标注） |
-| **Star 数** | 搜索时未显示具体数值 |
+| **Star 数** | 搜索时未显示具体数值（截至 2026-07） |
 | **Fork 数** | 同上 |
 | **平台** | Android |
 

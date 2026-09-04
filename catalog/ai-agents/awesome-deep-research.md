@@ -34,6 +34,7 @@ summary: ACL 2026 KnowFM 论文配套 — Agentic Deep Research 最全资源（�
 | **所属组织/作者** | DavidZWZ（Zhang Weizhi 等） |
 | **论文** | From Web Search towards Agentic Deep Research（ACL 2026 KnowFM） |
 | **开源许可** | MIT |
+| **技术栈** | Markdown（文档型 awesome 列表） |
 | **技术类型** | awesome-list + 论文汇总 |
 | **提交数** | 108 commits（活跃维护） |
 

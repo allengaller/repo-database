@@ -48,7 +48,6 @@ repo-database/
 │   ├── update_monthly.py      # 月度增量抓取 + 报告
 │   ├── discover_repos.py      # 基于关键词的发现（gh CLI）-> discoveries.jsonl
 │   ├── catalog.py             # 档案库管理器（new/index/validate/lint/refresh）
-│   ├── eval_baseline.py       # 一键复评基线（见 docs/EVALUATION-2026-09-04.md）
 │   ├── backfill_lineage.py    # 一次性脚本：回填 lineage 字段
 │   └── common.py              # 共享的 HTTP/session 辅助函数
 ├── data/
@@ -63,9 +62,9 @@ repo-database/
 │   └── <domain>/<repo>.md     # 10 个领域下共 117 篇档案
 ├── research/                  # 专题调研（mind-coach、psychology-projects）
 ├── web/                       # 纯 HTML/CSS/JS 前端 + PWA Service Worker
-├── tests/                     # pytest 用例（scripts / catalog / frontend / frontend-logic）
+├── tests/                     # 100 个 pytest 用例（scripts / catalog / frontend）
 ├── docs/                      # 归档的规划与评审文档
-├── .github/workflows/         # ci · monthly-scrape · monthly-update
+├── .github/workflows/         # ci · deploy-pages · monthly-scrape · monthly-update
 ├── pyproject.toml             # 依赖 + ruff/pytest 配置
 └── uv.lock                    # 锁定全部传递依赖，保证可复现安装
 ```
@@ -234,9 +233,10 @@ uv run pytest tests/ -v          # 100 个用例
 
 | 工作流 | 触发时机 | 行为 |
 |---|---|---|
-| `ci.yml` | push / PR 到 `main` | pytest → ruff → 语法检查 → `catalog.py validate` → `catalog.py lint`（软） |
+| `ci.yml` | push / PR 到 `main` | pytest → 语法检查 → `catalog.py validate` → `catalog.py lint`（软） |
 | `monthly-scrape.yml` | 每月 1 日 00:00 UTC | 全量多源抓取，提交 `data/repos.json` |
 | `monthly-update.yml` | 每月 1 日 06:00 UTC | 月度增量抓取 + `catalog.py refresh` + `index`，提交结果 |
+| `deploy-pages.yml` | push 到 `main` | 将 `web/` 发布到 GitHub Pages |
 
 抓取周期是**每月**，不是每日。本仓库未启用 GitHub Pages，因此没有在线 Demo —— 请本地运行，或在自己的 fork 上开启 Pages（见常见问题）。
 
@@ -251,7 +251,7 @@ uv run pytest tests/ -v          # 100 个用例
 | 前端 | 纯 HTML/CSS/JS —— 零构建步骤 |
 | 离线 | Service Worker + PWA manifest |
 | CI/CD | GitHub Actions |
-| 部署 | 默认无托管 · 任意静态主机（见常见问题） |
+| 部署 | GitHub Pages（需自行开启） |
 
 ---
 
@@ -269,7 +269,7 @@ uv run pytest tests/ -v          # 100 个用例
 **想要一份在线版本？**
 1. Fork 本仓库
 2. Settings → Pages → Source 选择 **GitHub Actions**
-3. 自行添加一个静态站点 workflow（本仓库不再内置——旧的 `deploy-pages.yml` 保留在 git 历史中可参考），由它把 `web/` 发布到 GitHub Pages
+3. 推送到 `main`，`deploy-pages.yml` 会把 `web/` 发布到 `https://<user>.github.io/repo-database/`
 
 ---
 

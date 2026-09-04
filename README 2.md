@@ -48,7 +48,6 @@ repo-database/
 │   ├── update_monthly.py      # Per-month incremental fetch + report
 │   ├── discover_repos.py      # Keyword discovery via gh CLI -> discoveries.jsonl
 │   ├── catalog.py             # Catalog manager (new/index/validate/lint/refresh)
-│   ├── eval_baseline.py       # One-command review baseline (see docs/EVALUATION-2026-09-04.md)
 │   ├── backfill_lineage.py    # One-off: backfill `lineage` frontmatter
 │   └── common.py              # Shared HTTP/session helpers
 ├── data/
@@ -63,9 +62,9 @@ repo-database/
 │   └── <domain>/<repo>.md     # 117 profiles across 10 domains
 ├── research/                  # Topic-level research (mind-coach, psychology-projects)
 ├── web/                       # Vanilla HTML/CSS/JS frontend + PWA service worker
-├── tests/                     # pytest cases (scripts / catalog / frontend / frontend-logic)
+├── tests/                     # 100 pytest cases (scripts / catalog / frontend)
 ├── docs/                      # Archived planning & review docs
-├── .github/workflows/         # ci · monthly-scrape · monthly-update
+├── .github/workflows/         # ci · deploy-pages · monthly-scrape · monthly-update
 ├── pyproject.toml             # Deps + ruff/pytest config
 └── uv.lock                    # Pinned transitive deps for reproducible installs
 ```
@@ -234,9 +233,10 @@ score = stars
 
 | Workflow | Trigger | Does |
 |---|---|---|
-| `ci.yml` | push / PR to `main` | pytest → ruff → syntax check → `catalog.py validate` → `catalog.py lint` (soft) |
+| `ci.yml` | push / PR to `main` | pytest → syntax check → `catalog.py validate` → `catalog.py lint` (soft) |
 | `monthly-scrape.yml` | 1st of month, 00:00 UTC | Full multi-source scrape, commits `data/repos.json` |
 | `monthly-update.yml` | 1st of month, 06:00 UTC | Monthly incremental fetch + `catalog.py refresh` + `index`, commits results |
+| `deploy-pages.yml` | push to `main` | Publishes `web/` to GitHub Pages |
 
 Cadence is **monthly**, not daily. GitHub Pages is not enabled on this repository, so there is no hosted demo — run it locally, or enable Pages on your own fork (see FAQ).
 
@@ -251,7 +251,7 @@ Cadence is **monthly**, not daily. GitHub Pages is not enabled on this repositor
 | Frontend | Vanilla HTML/CSS/JS — zero build step |
 | Offline | Service Worker + PWA manifest |
 | CI/CD | GitHub Actions |
-| Hosting | None by default · any static host (see FAQ) |
+| Hosting | GitHub Pages (opt-in) |
 
 ---
 
@@ -269,7 +269,7 @@ Most often the filename: it must be the **repo** part only, lowercased with `_` 
 **Want a hosted copy?**
 1. Fork the repo
 2. Settings → Pages → Source: **GitHub Actions**
-3. Add a static-site workflow of your own (this repo ships none — the former `deploy-pages.yml` remains in git history for reference); it should publish `web/` to GitHub Pages
+3. Push to `main`; `deploy-pages.yml` publishes `web/` to `https://<user>.github.io/repo-database/`
 
 ---
 

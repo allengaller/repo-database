@@ -12,7 +12,7 @@ updated: 2026-07-30
 rating: 4
 status: active
 tags: [yogacara, memory-engine, rust]
-summary: 唯识"种子-现行-熏习"机制的 Rust 记忆引擎
+summary: 唯识"种子-现行-熏习"机制的 Rust 记忆引擎 — 把八识论作成可编程记忆层，为 agent 长期记忆提供佛教心理学路线的实现参考
 ---
 
 # Alaya · SecurityRonin/alaya 深度研究
@@ -279,7 +279,7 @@ pub fn perfume(conn: &Connection, interaction: &Interaction,
 ### 6.3 潜在风险或局限
 
 - **单人项目**：核心开发者仅 h4x0r 一人，bus factor = 1，长期维护风险高
-- **Star 数低（13）**：社区验证不足，生产环境使用需慎重
+- **Star 数低（13，截至 2026-07）**：社区验证不足，生产环境使用需慎重
 - **v0.4 阶段**：API 可能不稳定（`#[non_exhaustive]` 标注表明类型仍可能变化）
 - **缺乏真实教练场景验证**：当前评估仅限于标准 QA benchmark（LoCoMo、LongMemEval），未在对话教练场景测试
 - **唯识映射的局限性**：阿赖耶识在唯识论中远比"种子库"复杂——它涉及种子与现行的同时因果、自证分等深层哲学问题，当前实现仅捕获了表层结构

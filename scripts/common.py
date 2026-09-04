@@ -1,8 +1,11 @@
 """Shared utilities for repo-database scripts."""
 
-import math
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 DATA_FILE = "data/repos.json"
@@ -30,6 +33,25 @@ def get_headers():
     return headers
 
 
+def get_session():
+    """Create a requests session with retry + exponential backoff.
+
+    Retries up to 3 times on 429/500/502/503/504 with backoff
+    factor 1.0 (1s, 2s, 4s between retries).
+    """
+    session = requests.Session()
+    retry = Retry(
+        total=3,
+        backoff_factor=1.0,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=["GET"],
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+    return session
+
+
 def freshness_decay(repo, now=None):
     """Exponential freshness decay based on `fetched_at`.
 
@@ -41,10 +63,10 @@ def freshness_decay(repo, now=None):
     if not fetched_at:
         return 1.0
     try:
-        ref = now or datetime.now(timezone.utc)
-        fetched = datetime.fromisoformat(str(fetched_at).replace("Z", "+00:00"))
+        ref = now or datetime.now(UTC)
+        fetched = datetime.fromisoformat(str(fetched_at))
         if fetched.tzinfo is None:
-            fetched = fetched.replace(tzinfo=timezone.utc)
+            fetched = fetched.replace(tzinfo=UTC)
         age_days = max((ref - fetched).total_seconds() / 86400.0, 0.0)
     except (ValueError, TypeError, AttributeError):
         return 1.0

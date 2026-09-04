@@ -12,7 +12,7 @@ updated: 2026-07-29
 rating: 3
 status: active
 tags: [yogacara, eight-consciousnesses]
-summary: 唯识八识全映射的 Python agent 框架
+summary: 唯识八识全映射的 Python agent 框架 — 把八识-心所结构映射到 agent 感知与决策流水线，唯识计算方向的源头实验项目
 ---
 
 # Yogacara . Greatbeing/Yogacara 深度研究
@@ -37,7 +37,7 @@ summary: 唯识八识全映射的 Python agent 框架
 |------|------|
 | **创建时间** | 2026-04-20 |
 | **最后推送** | 2026-04-30 |
-| **Stars / Forks** | 1 / 0 |
+| **Stars / Forks** | 1 / 0（截至 2026-07） |
 | **协议** | MIT |
 | **主语言** | Python (80%)、TeX (9%, 论文)、HTML (11%, demo 站点) |
 | **版本** | v0.1.0 (Alpha) |

@@ -25,7 +25,7 @@ summary: 首个开源 AI 编程 harness 构建器，把 AI 写代码流程化、
 | 作者 | coleam00（GitHub 知名 AI 编程博主，YouTube "Cole Medin" 频道主理人） |
 | 主语言 | TypeScript（Bun runtime）+ Python（旧版本 v1 task management） |
 | License | MIT |
-| 当前 Stars | ~17k（2026-08 持续上涨） |
+| 当前 Stars | ~17k（截至 2026-08，持续上涨） |
 | Commits | 1,717+ |
 | 维护频度 | 几乎每天更新（PR/Issue 活跃） |
 

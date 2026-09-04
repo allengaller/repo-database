@@ -40,6 +40,15 @@ jobs:
             pytest tests/ -v --tb=short
           fi
 
+      - name: Lint Python (ruff)
+        # Runs in the same pinned venv, so rule behaviour matches uv.lock.
+        run: |
+          if command -v uv >/dev/null 2>&1 && [ -f uv.lock ]; then
+            uv run ruff check scripts/ tests/
+          else
+            ruff check scripts/ tests/
+          fi
+
       - name: Syntax check scripts
         run: |
           for f in scrape.py update_monthly.py catalog.py discover_repos.py; do

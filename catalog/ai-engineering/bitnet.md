@@ -25,7 +25,7 @@ summary: 微软官方 1-bit LLM 推理框架 bitnet.cpp——1.58-bit 三元量�
 | 维护方 | Microsoft Research（Ma et al. 团队） |
 | 主语言 | C/C++（核心 kernels）+ Python（推理脚本） |
 | License | MIT |
-| 当前 Stars | ~18.7k（2026-08） |
+| 当前 Stars | ~18.7k（截至 2026-08） |
 | 配套模型 | BitNet-b1.58-2B-4T（2.4B / 4T tokens） / BitNet-embedding-0.6B / 270M |
 | 最近更新 | 7/27/2026 VibeASR.cpp 集成（CPU 多语种 ASR） |
 

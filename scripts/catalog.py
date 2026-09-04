@@ -15,7 +15,8 @@ import argparse
 import os
 import re
 import sys
-from datetime import date, datetime
+from datetime import UTC, date, datetime
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from common import get_headers
@@ -175,6 +176,11 @@ def cmd_new(args):
         print(f"Error: unknown domain '{args.domain}'. Choose from: {', '.join(DOMAINS)}")
         return 1
     path = os.path.join(CATALOG_DIR, args.domain, profile_filename(repo))
+    # repo names come from user-supplied URLs; make sure they can never
+    # escape the catalog/ tree via `..` segments or absolute paths.
+    if not os.path.realpath(path).startswith(os.path.realpath(CATALOG_DIR) + os.sep):
+        print(f"Error: refusing to write outside {CATALOG_DIR}/ (repo name: {repo!r})")
+        return 1
     if os.path.exists(path):
         print(f"Error: profile already exists: {path}")
         return 1
@@ -183,7 +189,7 @@ def cmd_new(args):
     if not info:
         print("  Warning: repo metadata unavailable; stars/forks/license below are")
         print("  placeholders. Run `python scripts/catalog.py refresh` to backfill.")
-    today = date.today().isoformat()
+    today = datetime.now(UTC).date().isoformat()
     meta = {
         "name": f"{owner}/{repo}",
         "url": f"https://github.com/{owner}/{repo}",
@@ -208,8 +214,7 @@ def cmd_new(args):
     )
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(dump_frontmatter(meta) + body)
+    Path(path).write_text(dump_frontmatter(meta) + body, encoding="utf-8")
     print(f"Created draft: {path}")
     print("Next: fill in the analysis sections, adjust type/rating/tags/summary,")
     print("then run: python scripts/catalog.py index && python scripts/catalog.py validate")
@@ -292,8 +297,7 @@ def build_index():
 
 def cmd_index(args):
     content = build_index()
-    with open(INDEX_FILE, "w", encoding="utf-8") as f:
-        f.write(content)
+    Path(INDEX_FILE).write_text(content, encoding="utf-8")
     print(f"Wrote {INDEX_FILE}")
     return 0
 
@@ -372,8 +376,11 @@ def check_profile_links(path, body, catalog_root=None):
 def cmd_validate(args):
     failed = False
     count = 0
+    domain_counts = {}
     for path, meta, body in iter_profiles():
         count += 1
+        domain = meta.get("domain", "unknown")
+        domain_counts[domain] = domain_counts.get(domain, 0) + 1
         for err in validate_profile(path, meta):
             print(f"{path}: {err}")
             failed = True
@@ -391,11 +398,69 @@ def cmd_validate(args):
             print(f"{INDEX_FILE}: stale (run: python scripts/catalog.py index)")
             failed = True
 
+    for err in check_readme_consistency(count, domain_counts):
+        print(err)
+        failed = True
+
     if failed:
         print("Validation FAILED")
         return 1
     print(f"Validation OK: {count} profiles")
     return 0
+
+
+# README count claims (badge, prose, domain table) drift silently whenever a
+# profile is added without updating the docs — enforce them here instead.
+README_FILES = ("README.md", "README.zh-CN.md")
+README_COUNT_PATTERNS = (
+    re.compile(r"catalog-(\d+)_profiles"),
+    re.compile(r"(\d+) Markdown profiles"),
+    re.compile(r"(\d+) profiles across 10 domains"),
+    re.compile(r"(\d+) profiles, 10 domains"),
+    re.compile(r"(\d+) 篇 Markdown 档案"),
+    re.compile(r"(\d+) 篇档案"),
+)
+DOMAIN_ROW_PATTERN = re.compile(r"^\|\s*`([a-z0-9-]+)`\s*\|\s*(\d+)\s*\|", re.MULTILINE)
+
+
+def check_readme_consistency(total, domain_counts):
+    """Return errors for every README profile-count claim that disagrees with
+    the actual catalog contents."""
+    errors = []
+    root = os.path.dirname(CATALOG_DIR) or "."
+    for name in README_FILES:
+        path = os.path.join(root, name)
+        if not os.path.exists(path):
+            errors.append(f"{name}: missing (count claims unchecked)")
+            continue
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
+        for pattern in README_COUNT_PATTERNS:
+            for match in pattern.finditer(text):
+                claimed = int(match.group(1))
+                if claimed != total:
+                    errors.append(
+                        f"{name}: claims {claimed} profiles ('{match.group(0)}'), actual {total}"
+                    )
+        seen = set()
+        for match in DOMAIN_ROW_PATTERN.finditer(text):
+            domain, claimed = match.group(1), int(match.group(2))
+            if domain in seen:
+                continue
+            seen.add(domain)
+            if domain not in domain_counts:
+                errors.append(f"{name}: domain table lists unknown domain '{domain}'")
+            elif claimed != domain_counts[domain]:
+                errors.append(
+                    f"{name}: domain table claims {claimed} in '{domain}', "
+                    f"actual {domain_counts[domain]}"
+                )
+        for domain, actual in sorted(domain_counts.items()):
+            if domain not in seen:
+                errors.append(
+                    f"{name}: domain table missing '{domain}' ({actual} profiles)"
+                )
+    return errors
 
 
 # --------------------------------------------------------------------- lint
@@ -404,20 +469,20 @@ def cmd_validate(args):
 # catalog ("核心功能特性" / "核心特性" / "关键能力" / "核心价值主张" etc.), so we
 # match on substring anchors instead of strict `## 项目基本信息` literal.
 #   * 项目基本信息 — always required
-#   * 技术栈 OR 架构 OR 架构分析
-#   * 核心功能 OR 核心特性 OR 功能特性 OR 关键能力 OR 核心价值
-#   * 应用场景 OR 场景
-#   * 个人评价 OR 优势与不足 OR 评价
-#   * 相关资源 OR 资源链接
+#   * 技术栈 OR 架构
+#   * 核心功能 OR 核心特性 OR 功能特性 OR 关键能力 OR 核心价值 OR 覆盖维度
+#   * 应用场景 OR 场景 OR 应用方向
+#   * 个人评价 OR 评价
+#   * 相关资源 OR 资源 OR 参考资料
 # Legacy profiles (`mind-philosophy/*`, `ai-agents/yogacara-agent.md`) are
 # exempt; the check only flags missing anchors as warnings.
 REQUIRED_ANCHORS = [
     ["项目基本信息"],
     ["技术栈", "架构"],
-    ["核心功能", "核心特性", "功能特性", "关键能力", "核心价值", "核心能力"],
-    ["应用场景", "场景"],
+    ["核心功能", "核心特性", "功能特性", "关键能力", "核心价值", "核心能力", "覆盖维度"],
+    ["应用场景", "场景", "应用方向"],
     ["个人评价", "评价"],
-    ["相关资源", "资源"],
+    ["相关资源", "资源", "参考资料"],
 ]
 LEGACY_EXEMPT = {"mind-philosophy", "ai-agents/yogacara-agent.md"}
 
@@ -458,19 +523,23 @@ def lint_profile(path, body, meta):
         )
     # 3. Star number with fetch date (only if stars > 0)
     stars = meta.get("stars", 0)
-    if isinstance(stars, int) and stars > 0:
-        if "（截至" not in body and "(as of" not in body:
-            warnings.append(
-                "star count lacks fetch-date stamp (use '~23,000（截至 2026-08）' format)"
-            )
+    if (
+        isinstance(stars, int)
+        and stars > 0
+        and "截至" not in body
+        and "as of" not in body.lower()
+    ):
+        warnings.append(
+            "star count lacks fetch-date stamp (use '~23,000（截至 2026-08）' format)"
+        )
     # 4. Stale updated == discovered
     discovered = str(meta.get("discovered", ""))
     updated = str(meta.get("updated", ""))
     if discovered and updated and discovered == updated:
         try:
-            d = datetime.strptime(discovered, "%Y-%m-%d")
-            today = date.today()
-            if (today - d.date()).days > 180:
+            d = date.fromisoformat(discovered)
+            today = datetime.now(UTC).date()
+            if (today - d).days > 180:
                 warnings.append(
                     f"updated == discovered ({discovered}) for >180 days; "
                     "consider running refresh or hand-editing 'updated'"
@@ -500,7 +569,7 @@ def cmd_lint(args):
 
 def cmd_refresh(args):
     updated_count = 0
-    today = date.today().isoformat()
+    today = datetime.now(UTC).date().isoformat()
     for path, meta, body in iter_profiles():
         if meta.get("status") == "archived":
             continue
@@ -525,8 +594,7 @@ def cmd_refresh(args):
                 changed = True
         if changed:
             meta["updated"] = today
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(dump_frontmatter(meta) + body)
+            Path(path).write_text(dump_frontmatter(meta) + body, encoding="utf-8")
             updated_count += 1
             print(f"Refreshed {path}: stars={meta['stars']} forks={meta['forks']}")
     print(f"Done: {updated_count} profiles updated")

@@ -87,7 +87,7 @@ summary: 面向金融垂直领域的多 Agent LLM 平台，用金融 CoT 思维�
 - 主框架仍依赖 `pyautogen`（Microsoft 项目），autogen 0.2 → 0.4 重构期间 API 不稳
 - 核心仍是 GPT-4 调优效果最好，本地模型对金融术语理解有限
 - 单 repo 单 demo 风格，缺少完整 backtest 框架（对比 FinRL 偏弱）
-- 274 commits + ~3.3k stars，增长曲线相对平缓，2024-2026 热度被 shiyu-coder/Kronos（金融 LLM 基础模型）盖过
+- 274 commits + ~3.3k stars（截至 2026-08），增长曲线相对平缓，2024-2026 热度被 shiyu-coder/Kronos（金融 LLM 基础模型）盖过
 
 **评分理由：** 4 星。垂直领域完整度（论文 + 框架 + 数据 + 应用）达 9 成，生态建设略逊于综合 Agent 平台（LangChain / AutoGen），但在"金融 AI Agent"这个细分赛道稳坐前 2。
 

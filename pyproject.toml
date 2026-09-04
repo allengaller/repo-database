@@ -20,3 +20,6 @@ line-length = 120
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "frontend_logic: web/app.js logic checks (loaded in a node sandbox; skipped without node)",
+]

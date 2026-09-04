@@ -34,7 +34,7 @@ summary: Karpathy 出品 — 100 美元搭一个 ChatGPT，最便宜的全栈 LL
 | **所属组织/作者** | Andrej Karpathy |
 | **描述** | The best ChatGPT that $100 can buy. |
 | **开源许可** | MIT |
-| **Star 数** | ~42,416 |
+| **Star 数** | ~42,416（截至 2026-08） |
 | **Fork 数** | ~5,477 |
 | **技术类型** | framework / education |
 

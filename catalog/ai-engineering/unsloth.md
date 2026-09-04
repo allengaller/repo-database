@@ -34,7 +34,8 @@ summary: 6.9 万 stars 的 LLM 微调加速库 — 比 HuggingFace Transformers 
 | **所属组织/作者** | unslothai |
 | **描述** | LLM 微调加速库：比 HF Transformers 快 2-5x，内存省 80% |
 | **开源许可** | Apache-2.0 |
-| **Star 数** | ~69,403 |
+| **技术栈** | Python |
+| **Star 数** | ~69,403（截至 2026-08） |
 | **技术类型** | tool / library |
 
 ---

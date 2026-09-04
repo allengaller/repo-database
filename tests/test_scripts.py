@@ -4,7 +4,7 @@ Run with:  pytest tests/ -v
 """
 
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -13,10 +13,9 @@ import responses
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
-import scrape  # noqa: E402
-import update_monthly  # noqa: E402
-import common  # noqa: E402
-
+import common
+import scrape
+import update_monthly
 
 # ---------- parse_num --------------------------------------------------------
 
@@ -67,7 +66,7 @@ def test_calculate_score_fresh_fetch_is_full():
         "commit_activity": 30,
         "fetched_at": "2026-07-26T00:00:00+00:00",
     }
-    now = datetime(2026, 7, 26, 0, 0, tzinfo=timezone.utc)
+    now = datetime(2026, 7, 26, 0, 0, tzinfo=UTC)
     # 1000 + 100 + 100 + 50*10 + 30*2 = 1760
     assert common.calculate_score(repo, now=now) == 1760.0
 
@@ -82,7 +81,7 @@ def test_calculate_score_at_half_life_decay():
         "fetched_at": "2026-01-01T00:00:00+00:00",
     }
     # 120 days after fetch
-    now = datetime(2026, 1, 1, tzinfo=timezone.utc) + timedelta(days=120)
+    now = datetime(2026, 1, 1, tzinfo=UTC) + timedelta(days=120)
     decay = common.freshness_decay(repo, now=now)
     assert 0.49 < decay < 0.51
     # Effective score: 1200 base + 50*10*0.5 + 30*2*0.5 = 1200 + 250 + 30 = 1480
@@ -98,7 +97,7 @@ def test_calculate_score_decay_floors_at_minimum():
         "commit_activity": 30,
         "fetched_at": "2020-01-01T00:00:00+00:00",
     }
-    now = datetime(2030, 1, 1, tzinfo=timezone.utc)  # 10 years later
+    now = datetime(2030, 1, 1, tzinfo=UTC)  # 10 years later
     decay = common.freshness_decay(repo, now=now)
     assert decay == common.FRESHNESS_FLOOR
     # Effective score: 1200 base + 50*10*0.05 + 30*2*0.05 = 1200 + 25 + 3 = 1228
@@ -110,7 +109,7 @@ def test_calculate_score_missing_fetched_at_is_one():
     repo = {
         "stars": 1000, "forks": 100, "today_stars": 50, "commit_activity": 30,
     }
-    far_future = datetime.now(timezone.utc) + timedelta(days=10 * 365)
+    far_future = datetime.now(UTC) + timedelta(days=10 * 365)
     assert common.freshness_decay(repo, now=far_future) == 1.0
 
 
@@ -129,7 +128,7 @@ def test_calculate_score_stars_and_forks_dont_decay():
         "stars": 50_000, "forks": 5_000, "today_stars": 0, "commit_activity": 0,
         "fetched_at": "2020-01-01T00:00:00+00:00",
     }
-    now = datetime(2030, 1, 1, tzinfo=timezone.utc)
+    now = datetime(2030, 1, 1, tzinfo=UTC)
     # 50000 + 5000 + (5000/50000)*1000 = 55000 + 100 = 55100 (no decay on base)
     assert common.calculate_score(repo, now=now) == 55100.0
 
@@ -137,11 +136,11 @@ def test_calculate_score_stars_and_forks_dont_decay():
 # ---------- estimate_today_stars --------------------------------------------
 
 def _iso(dt):
-    return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    return dt.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
 def test_estimate_today_stars_recent_push():
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     repo = {
         "pushed_at": _iso(now - timedelta(hours=3)),
         "created_at": _iso(now - timedelta(days=365)),
@@ -151,7 +150,7 @@ def test_estimate_today_stars_recent_push():
 
 
 def test_estimate_today_stars_week_old_push():
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     repo = {
         "pushed_at": _iso(now - timedelta(days=5)),
         "created_at": _iso(now - timedelta(days=365)),
@@ -162,7 +161,7 @@ def test_estimate_today_stars_week_old_push():
 
 
 def test_estimate_today_stars_stale_push():
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     repo = {
         "pushed_at": _iso(now - timedelta(days=60)),
         "created_at": _iso(now - timedelta(days=365)),
@@ -172,7 +171,7 @@ def test_estimate_today_stars_stale_push():
 
 
 def test_estimate_today_stars_new_viral_repo():
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     repo = {
         "pushed_at": _iso(now - timedelta(hours=6)),
         "created_at": _iso(now - timedelta(days=5)),
@@ -575,9 +574,7 @@ def test_configure_stdout_swallows_unsupported_streams():
     """If ``sys.stdout`` is something exotic without ``reconfigure``
     (e.g. captured by pytest's capsys, or running on older interpreters),
     the helper must silently no-op rather than crash startup."""
-    sentinel = object()  # a stream that has no reconfigure attribute
-
-    class _NoReconfigure:
+    class _NoReconfigure:  # a stream that has no reconfigure attribute
         pass
 
     fake = _NoReconfigure()

@@ -34,6 +34,7 @@ summary: 微软开源的 AI Agent 训练器 — 14k stars，"the absolute traine
 | **所属组织/作者** | Microsoft |
 | **描述** | The absolute trainer to light up AI agents. |
 | **开源许可** | MIT |
+| **技术栈** | Python |
 | **Star 数** | ~22,000（截至 2026-08） |
 | **技术类型** | framework |
 

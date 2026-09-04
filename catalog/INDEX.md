@@ -160,17 +160,17 @@
 
 | 项目 | ⭐ | 类型 | 评价 | 状态 | 简介 | 档案 |
 |------|-----|------|------|------|------|------|
-| [SecurityRonin/alaya](https://github.com/SecurityRonin/alaya) | 13 | library | ⭐⭐⭐⭐ | active | 唯识"种子-现行-熏习"机制的 Rust 记忆引擎 | [alaya.md](mind-philosophy/alaya.md) |
+| [SecurityRonin/alaya](https://github.com/SecurityRonin/alaya) | 13 | library | ⭐⭐⭐⭐ | active | 唯识"种子-现行-熏习"机制的 Rust 记忆引擎 — 把八识论作成可编程记忆层，为 agent 长期记忆提供佛教心理学路线的实现参考 | [alaya.md](mind-philosophy/alaya.md) |
 | [dosanko-tousan/Gemini-Abhidhamma-Alignment](https://github.com/dosanko-tousan/Gemini-Abhidhamma-Alignment) | 3 | tool | ⭐⭐⭐ | active | 阿毗达磨 × Gemini 的减法对齐 prompt 框架（含中文 System Prompt 移植） | [gemini-abhidhamma-alignment.md](mind-philosophy/gemini-abhidhamma-alignment.md) |
-| [Greatbeing/Yogacara](https://github.com/Greatbeing/Yogacara) | 1 | framework | ⭐⭐⭐ | active | 唯识八识全映射的 Python agent 框架 | [yogacara.md](mind-philosophy/yogacara.md) |
+| [Greatbeing/Yogacara](https://github.com/Greatbeing/Yogacara) | 1 | framework | ⭐⭐⭐ | active | 唯识八识全映射的 Python agent 框架 — 把八识-心所结构映射到 agent 感知与决策流水线，唯识计算方向的源头实验项目 | [yogacara.md](mind-philosophy/yogacara.md) |
 | [FrankNavratil/buddhist-psychology-course](https://github.com/FrankNavratil/buddhist-psychology-course) | 1 | course | ⭐⭐ | active | 30 模块佛教心理学商业课程（$495），课程商业化结构参考 | [buddhist-psychology-course.md](mind-philosophy/buddhist-psychology-course.md) |
 
 ### 冥想/正念应用 (`mindfulness-apps/`)
 
 | 项目 | ⭐ | 类型 | 评价 | 状态 | 简介 | 档案 |
 |------|-----|------|------|------|------|------|
-| [giekaton/vipassana-app](https://github.com/giekaton/vipassana-app) | 9 | application | ⭐⭐⭐⭐ | active | 游戏化内观冥想 PWA，八角形 SVG 觉察-标记机制 | [vipassana-app.md](mindfulness-apps/vipassana-app.md) |
-| [happyruss/vipassana_android](https://github.com/happyruss/vipassana_android) | 4 | application | ⭐⭐ | active | Android 原生内观冥想引导 App，开源供实践者复用 | [vipassana-android.md](mindfulness-apps/vipassana-android.md) |
+| [giekaton/vipassana-app](https://github.com/giekaton/vipassana-app) | 9 | application | ⭐⭐⭐⭐ | active | 游戏化内观冥想 PWA — 八角形 SVG"觉察-标记"交互把内观操作转化为点击体验，为冥想类产品提供优秀的交互范式参考 | [vipassana-app.md](mindfulness-apps/vipassana-app.md) |
+| [happyruss/vipassana_android](https://github.com/happyruss/vipassana_android) | 4 | application | ⭐⭐ | active | Android 原生内观冥想引导 App（Java）— 开源供实践者复用的离线引导工具，适合作为本地化冥想产品的参考实现 | [vipassana-android.md](mindfulness-apps/vipassana-android.md) |
 
 ## 按类型
 

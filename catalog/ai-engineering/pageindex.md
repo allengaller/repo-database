@@ -34,7 +34,8 @@ summary: 📑 抛弃向量数据库的"无向量" RAG — 基于推理的文档�
 | **所属组织/作者** | VectifyAI |
 | **描述** | 📑 PageIndex: Document Index for Vectorless, Reasoning-based RAG |
 | **开源许可** | MIT |
-| **Star 数** | ~13,800 |
+| **技术栈** | Python |
+| **Star 数** | ~13,800（截至 2026-08） |
 | **周新增** | +3,051 |
 | **技术类型** | framework |
 
